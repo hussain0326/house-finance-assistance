@@ -1,0 +1,46 @@
+@use '@angular/material' as mat;
+@import 'tailwindcss';
+
+@include mat.core();
+
+$finance-primary: mat.m2-define-palette(mat.$m2-indigo-palette, 600, 400, 800);
+$finance-accent: mat.m2-define-palette(mat.$m2-teal-palette, 500, 300, 700);
+$finance-warn: mat.m2-define-palette(mat.$m2-red-palette);
+
+$finance-theme: mat.m2-define-light-theme(
+	(
+		color: (
+			primary: $finance-primary,
+			accent: $finance-accent,
+			warn: $finance-warn,
+		),
+		typography: mat.m2-define-typography-config(
+			$font-family: 'Inter, Segoe UI, system-ui, sans-serif'
+		),
+		density: 0,
+	)
+);
+
+@include mat.all-component-themes($finance-theme);
+
+html,
+body {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+	background: #f8fafc;
+	color: #0f172a;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+/* Remove notch side seams that appear as a vertical line while typing/selecting values. */
+.mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline__notch {
+	border-left: 0;
+	border-right: 0;
+}

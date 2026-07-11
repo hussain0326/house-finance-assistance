@@ -1,0 +1,32 @@
+.history-card {
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.history-head {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.head-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2563eb;
+  color: #fff;
+}
+
+.history-row {
+  transition: box-shadow 0.2s ease;
+}
+
+.history-row:hover {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}

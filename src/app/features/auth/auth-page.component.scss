@@ -1,0 +1,23 @@
+.auth-bg {
+  background: #f8fafc;
+}
+
+.auth-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+}
+
+.auth-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-title .mat-icon {
+  color: #334155;
+}
+
+:host ::ng-deep .auth-card .mat-mdc-form-field-subscript-wrapper {
+  min-height: 0;
+}

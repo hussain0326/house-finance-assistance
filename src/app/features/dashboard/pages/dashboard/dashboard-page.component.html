@@ -1,0 +1,75 @@
+<section class="grid gap-4 md:grid-cols-3" aria-label="Spending summary cards">
+  <mat-card class="summary-card elevated-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title class="card-title-wrap">
+        <mat-icon>calendar_month</mat-icon>
+        Monthly Spending
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="pt-2 text-3xl font-semibold">{{ monthlySpend() | currency: 'EUR' }}</mat-card-content>
+  </mat-card>
+
+  <mat-card class="summary-card elevated-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title class="card-title-wrap">
+        <mat-icon>event_repeat</mat-icon>
+        Annual Spending
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="pt-2 text-3xl font-semibold">{{ annualSpend() | currency: 'EUR' }}</mat-card-content>
+  </mat-card>
+
+  <mat-card class="summary-card elevated-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title class="card-title-wrap">
+        <mat-icon>insights</mat-icon>
+        Average Daily Spend
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="pt-2 text-3xl font-semibold">{{ avgSpend() | currency: 'EUR' }}</mat-card-content>
+  </mat-card>
+</section>
+
+<section class="mt-4 grid gap-4 lg:grid-cols-2">
+  <mat-card appearance="outlined" class="elevated-card">
+    <mat-card-header>
+      <mat-card-title class="card-title-wrap">
+        <mat-icon>receipt_long</mat-icon>
+        Recent Expenses
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <ul class="mt-2 flex list-none flex-col gap-3 p-0">
+        @for (expense of recentExpenses(); track expense.merchant + expense.date) {
+          <li class="rounded-xl border border-slate-200 bg-white/70 px-3 py-3">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <p class="m-0 font-medium">{{ expense.merchant }}</p>
+                <p class="m-0 text-sm text-slate-600">{{ expense.category }} • {{ expense.date | date }}</p>
+              </div>
+              <strong>{{ expense.amount | currency: 'EUR' }}</strong>
+            </div>
+          </li>
+        }
+      </ul>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="elevated-card">
+    <mat-card-header>
+      <mat-card-title class="card-title-wrap">
+        <mat-icon>trending_up</mat-icon>
+        Spending Trends
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div
+        echarts
+        [options]="trendChartOptions()"
+        class="chart-host mt-2 h-64 rounded-xl"
+        aria-label="Monthly spending trend chart"
+      >
+      </div>
+    </mat-card-content>
+  </mat-card>
+</section>

@@ -1,0 +1,33 @@
+<section class="grid gap-4 lg:grid-cols-2">
+  <mat-card appearance="outlined" class="analytic-card p-4">
+    <div class="card-head">
+      <mat-icon>pie_chart</mat-icon>
+      <div>
+        <h2 class="m-0 text-xl font-semibold">Category Breakdown</h2>
+        <p class="mt-1 text-slate-600">This month spending split by category.</p>
+      </div>
+    </div>
+    <div
+      echarts
+      [options]="categoryChartOptions"
+      class="chart-surface mt-3 h-72 rounded-xl border border-slate-200"
+      aria-label="Category breakdown chart"
+    ></div>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="analytic-card p-4">
+    <div class="card-head">
+      <mat-icon>bar_chart</mat-icon>
+      <div>
+        <h2 class="m-0 text-xl font-semibold">Monthly Comparison</h2>
+        <p class="mt-1 text-slate-600">Track spend movement over the year.</p>
+      </div>
+    </div>
+    <div
+      echarts
+      [options]="comparisonChartOptions"
+      class="chart-surface mt-3 h-72 rounded-xl border border-slate-200"
+      aria-label="Monthly comparison chart"
+    ></div>
+  </mat-card>
+</section>

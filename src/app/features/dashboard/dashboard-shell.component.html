@@ -1,0 +1,70 @@
+<mat-sidenav-container class="layout-shell min-h-screen">
+  <mat-sidenav mode="side" opened class="layout-side w-64" [fixedInViewport]="isMobile()" [opened]="!isMobile()">
+    <div class="brand-block px-4 py-5">
+      <div class="brand-mark">
+        <mat-icon>account_balance_wallet</mat-icon>
+      </div>
+      <div>
+        <h1 class="text-xl font-semibold tracking-tight">Home Finance</h1>
+        <p class="text-sm text-slate-600">Personal Budget Assistance</p>
+      </div>
+    </div>
+
+    <mat-nav-list class="nav-list">
+      @for (item of navItems; track item.route) {
+        <a mat-list-item [routerLink]="item.route" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar class="topbar sticky top-0 z-30 px-4" color="transparent">
+      <div class="toolbar-title-wrap">
+        <mat-icon>{{ currentPageIcon() }}</mat-icon>
+        <div class="toolbar-copy">
+          <span class="toolbar-heading">{{ currentPageTitle() }}</span>
+          <span class="toolbar-subheading">{{ currentPageSubtitle() }}</span>
+        </div>
+      </div>
+      <span class="flex-1"></span>
+      <button mat-stroked-button color="primary" class="mobile-signout md:hidden" (click)="signOut()">
+        <mat-icon>logout</mat-icon>
+        Sign Out
+      </button>
+    </mat-toolbar>
+
+    <main class="content-wrapper px-4 pb-16 pt-4 sm:px-6 sm:pt-6">
+      <section class="content-surface">
+        <router-outlet />
+      </section>
+    </main>
+
+    <footer class="app-footer" aria-label="Application footer">
+      <div class="footer-inner">
+        <span class="footer-copy">© {{ currentYear }} Home Finance Assistance</span>
+      </div>
+    </footer>
+
+    <nav class="bottom-nav fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-2 py-2 backdrop-blur md:hidden" aria-label="Primary navigation">
+      <ul class="grid grid-cols-6 gap-1">
+        @for (item of navItems; track item.route) {
+          <li>
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="active-mobile"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="mobile-nav-item block rounded-lg px-2 py-2 text-center text-xs font-medium text-slate-600"
+            >
+              <mat-icon>{{ item.icon }}</mat-icon>
+              {{ item.label }}
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+  </mat-sidenav-content>
+</mat-sidenav-container>
