@@ -19,6 +19,10 @@ export const STRONG_PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-
 export const STRONG_PASSWORD_MESSAGE =
   'Use at least 8 characters with uppercase, lowercase, a number, and a symbol.';
 
+const PASSWORD_RESET_COOLDOWN_MS = 60_000;
+const PASSWORD_RESET_RATE_LIMIT_MESSAGE =
+  'A reset email was recently requested. Please wait one minute before trying again.';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -26,6 +30,7 @@ export class AuthService {
   private readonly sessionSignal = signal<Session | null>(null);
   private readonly loadingSignal = signal(true);
   private readonly passwordRecoverySignal = signal(false);
+  private passwordResetAvailableAt = 0;
 
   readonly session = this.sessionSignal.asReadonly();
   readonly isLoading = this.loadingSignal.asReadonly();
@@ -103,14 +108,23 @@ export class AuthService {
       return { error: this.getConfigurationError() };
     }
 
+    if (Date.now() < this.passwordResetAvailableAt) {
+      return { error: PASSWORD_RESET_RATE_LIMIT_MESSAGE };
+    }
+
     const redirectTo = `${window.location.origin}/auth`;
     const { error } = await this.supabaseService.client.auth.resetPasswordForEmail(email, {
       redirectTo
     });
 
     if (error) {
+      if (error.message.toLowerCase().includes('email rate limit exceeded')) {
+        this.passwordResetAvailableAt = Date.now() + PASSWORD_RESET_COOLDOWN_MS;
+      }
       return { error: this.mapAuthError(error.message) };
     }
+
+    this.passwordResetAvailableAt = Date.now() + PASSWORD_RESET_COOLDOWN_MS;
 
     return {
       error: null,
@@ -230,6 +244,9 @@ export class AuthService {
     }
     if (value.includes('for security purposes')) {
       return 'Too many attempts. Please wait and try again.';
+    }
+    if (value.includes('email rate limit exceeded')) {
+      return PASSWORD_RESET_RATE_LIMIT_MESSAGE;
     }
 
     return rawMessage;

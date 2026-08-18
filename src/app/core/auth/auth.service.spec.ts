@@ -61,6 +61,16 @@ describe('AuthService', () => {
     expect(result.error).toBeNull();
   });
 
+  it('should return a clear error when Supabase rate limits reset emails', async () => {
+    mockAuth.resetPasswordForEmail.and.resolveTo({
+      error: { message: 'Email rate limit exceeded' }
+    });
+
+    const result = await service.requestPasswordReset('a@b.com');
+
+    expect(result.error).toBe('A reset email was recently requested. Please wait one minute before trying again.');
+  });
+
   it('should proxy testConnection', async () => {
     const result = await service.testConnection();
 
