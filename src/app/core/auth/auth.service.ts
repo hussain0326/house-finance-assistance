@@ -44,7 +44,12 @@ export class AuthService {
       return { error: this.getConfigurationError() };
     }
 
-    const { data, error } = await this.supabaseService.client.auth.signUp({ email, password });
+    const emailRedirectTo = `${window.location.origin}/auth`;
+    const { data, error } = await this.supabaseService.client.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo }
+    });
     if (error) {
       return { error: this.mapAuthError(error.message) };
     }
