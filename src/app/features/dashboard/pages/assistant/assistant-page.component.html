@@ -1,4 +1,88 @@
-<mat-card appearance="outlined" class="p-4">
-  <h2 class="m-0 text-xl font-semibold">AI Assistant</h2>
-  <p class="mt-2 text-slate-600">AI assistant tools and insights flow will be added in later phases.</p>
+<mat-card appearance="outlined" class="assistant-card">
+  <div class="card-head">
+    <div class="card-head-left">
+      <div class="head-icon">
+        <mat-icon>smart_toy</mat-icon>
+      </div>
+      <div>
+        <h2 class="m-0 text-xl font-semibold">AI Assistant</h2>
+        <p class="mt-1 text-slate-600">Ask questions about your spending, categories, and merchants.</p>
+      </div>
+    </div>
+    <button
+      mat-stroked-button
+      type="button"
+      matTooltip="Start a new conversation"
+      (click)="startNewChat()"
+    >
+      <mat-icon>add_comment</mat-icon>
+      New Chat
+    </button>
+  </div>
+
+  @if (messages().length === 1) {
+    <div class="prompt-chips">
+      @for (prompt of suggestedPrompts; track prompt) {
+        <button class="prompt-chip" type="button" (click)="usePrompt(prompt)">{{ prompt }}</button>
+      }
+    </div>
+  }
+
+  <div class="chat-log" #scrollContainer aria-live="polite">
+    @for (message of messages(); track $index) {
+      <div class="chat-row" [class.chat-row--user]="message.role === 'user'">
+        <div class="chat-avatar" [class.chat-avatar--user]="message.role === 'user'">
+          <mat-icon>{{ message.role === 'user' ? 'person' : 'smart_toy' }}</mat-icon>
+        </div>
+        <div class="chat-bubble-wrap">
+          <div class="chat-bubble" [class.chat-bubble--user]="message.role === 'user'">
+            {{ message.content }}
+          </div>
+          <span class="chat-time" [class.chat-time--user]="message.role === 'user'">{{ message.time }}</span>
+        </div>
+      </div>
+    }
+
+    @if (sending()) {
+      <div class="chat-row">
+        <div class="chat-avatar">
+          <mat-icon>smart_toy</mat-icon>
+        </div>
+        <div class="chat-bubble-wrap">
+          <div class="chat-bubble chat-bubble--typing">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (errorMessage()) {
+    <p class="error-banner" aria-live="polite">{{ errorMessage() }}</p>
+  }
+
+  <form class="composer" (ngSubmit)="send()">
+    <textarea
+      class="composer-input"
+      rows="1"
+      [ngModel]="draft()"
+      (ngModelChange)="onDraftChange($event)"
+      (keydown)="onInputKeydown($event)"
+      name="draft"
+      placeholder="Ask about your spending... (Enter to send, Shift+Enter for a new line)"
+      [disabled]="sending()"
+    ></textarea>
+    <button
+      mat-icon-button
+      color="primary"
+      type="submit"
+      class="composer-send"
+      [disabled]="sending() || !draft().trim()"
+      aria-label="Send message"
+    >
+      <mat-icon>send</mat-icon>
+    </button>
+  </form>
 </mat-card>

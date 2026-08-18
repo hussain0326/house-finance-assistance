@@ -24,6 +24,7 @@ export class ReceiptPageComponent {
   readonly isUploading = signal(false);
   readonly uploadMessage = signal('');
   readonly uploadSuccess = signal(false);
+  readonly ocrStatus = signal<'idle' | 'processing' | 'complete' | 'failed'>('idle');
 
   constructor(private readonly receiptService: ReceiptService) {}
 
@@ -32,6 +33,7 @@ export class ReceiptPageComponent {
     const file = input.files?.[0] ?? null;
     this.selectedFile.set(file);
     this.uploadMessage.set('');
+    this.ocrStatus.set('idle');
   }
 
   async uploadSelected(): Promise<void> {
@@ -42,6 +44,7 @@ export class ReceiptPageComponent {
 
     this.isUploading.set(true);
     this.uploadMessage.set('Uploading receipt...');
+    this.ocrStatus.set('processing');
 
     const result = await this.receiptService.uploadReceipt(file);
 
@@ -51,6 +54,13 @@ export class ReceiptPageComponent {
 
     if (result.success) {
       this.selectedFile.set(null);
+      const processingResult = result.receiptId
+        ? await this.receiptService.processReceipt(result.receiptId)
+        : { success: false, message: 'OCR processing could not be started.' };
+      this.ocrStatus.set(processingResult.success ? 'complete' : 'failed');
+      this.uploadMessage.set(
+        processingResult.success ? processingResult.message : `${result.message} ${processingResult.message}`
+      );
     }
   }
 }

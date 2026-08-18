@@ -9,17 +9,40 @@
     </div>
   </div>
 
-  <form class="mt-4 grid gap-3 md:grid-cols-3" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
-    <mat-form-field appearance="outline" class="md:col-span-2">
+  <form class="mt-4 grid gap-3 md:grid-cols-4" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+    <mat-form-field appearance="outline">
       <mat-label>Merchant Name</mat-label>
       <input matInput formControlName="search" placeholder="Aldi, utility, transport..." />
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Date</mat-label>
-      <input matInput [matDatepicker]="picker" formControlName="receiptDate" placeholder="Select date" />
-      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker></mat-datepicker>
+      <mat-label>Category</mat-label>
+      <mat-select formControlName="categoryId">
+        <mat-option value="">All categories</mat-option>
+        @for (category of categories(); track category.id) {
+          <mat-option [value]="category.id">{{ category.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Year</mat-label>
+      <mat-select formControlName="year">
+        <mat-option value="">All years</mat-option>
+        @for (year of years; track year) {
+          <mat-option [value]="year">{{ year }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Month</mat-label>
+      <mat-select formControlName="month">
+        <mat-option value="">All months</mat-option>
+        @for (month of months; track month.value) {
+          <mat-option [value]="month.value">{{ month.label }}</mat-option>
+        }
+      </mat-select>
     </mat-form-field>
 
     <div class="md:col-span-4 flex flex-wrap gap-2">
@@ -32,10 +55,35 @@
     <p class="mt-3 text-sm text-slate-600" aria-live="polite">{{ feedback() }}</p>
   }
 
+  @if (items().length) {
+    <div class="mt-4 flex items-center justify-between">
+      <mat-checkbox [checked]="isAllSelected()" (change)="toggleSelectAll($event.checked)">
+        Select all on this page
+      </mat-checkbox>
+      @if (selectedIds().size) {
+        <button
+          mat-stroked-button
+          color="warn"
+          type="button"
+          [disabled]="deleting()"
+          (click)="deleteSelected()"
+        >
+          Delete Selected ({{ selectedIds().size }})
+        </button>
+      }
+    </div>
+  }
+
   <div class="mt-4 grid gap-3">
     @for (item of items(); track trackById($index, item)) {
       <article class="history-row rounded-xl border border-slate-200 bg-white/80 p-3">
-        <div class="grid gap-3 md:grid-cols-[96px_1fr_auto] md:items-center">
+        <div class="grid gap-3 md:grid-cols-[auto_96px_1fr_auto] md:items-center">
+          <mat-checkbox
+            [checked]="isSelected(item)"
+            (change)="toggleSelection(item, $event.checked)"
+            [attr.aria-label]="'Select receipt from ' + (item.merchant_name || 'unknown merchant')"
+          ></mat-checkbox>
+
           <a [href]="item.signed_image_url" target="_blank" rel="noopener" class="block overflow-hidden rounded-lg border border-slate-200">
             <img
               class="h-24 w-24 object-cover"
@@ -71,6 +119,9 @@
             <p class="m-0 text-sm text-slate-600">
               {{ item.receipt_date ? (item.receipt_date | date) : (item.created_at | date: 'mediumDate') }}
               • {{ item.processing_status }}
+              @if (item.category_name) {
+                • <span [style.color]="item.category_color || undefined">{{ item.category_name }}</span>
+              }
             </p>
             <p class="m-0 text-xs text-slate-500">Receipt ID: {{ item.id }}</p>
             @if (editingId() !== item.id) {
@@ -83,6 +134,16 @@
               {{ (item.total_amount ?? 0) | currency: item.currency || 'EUR' }}
             </p>
             <p class="m-0 text-xs text-slate-500">{{ item.currency }}</p>
+            <button
+              mat-icon-button
+              color="warn"
+              type="button"
+              [disabled]="deleting()"
+              (click)="deleteReceipt(item)"
+              [attr.aria-label]="'Delete receipt from ' + (item.merchant_name || 'unknown merchant')"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
           </div>
         </div>
       </article>

@@ -1,15 +1,30 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { ReceiptHistoryItem, ReceiptService } from '../../services/receipt.service';
+import { ExpenseCategory, ReceiptHistoryItem, ReceiptService } from '../../services/receipt.service';
+
+const MONTHS = [
+  { value: 0, label: 'January' },
+  { value: 1, label: 'February' },
+  { value: 2, label: 'March' },
+  { value: 3, label: 'April' },
+  { value: 4, label: 'May' },
+  { value: 5, label: 'June' },
+  { value: 6, label: 'July' },
+  { value: 7, label: 'August' },
+  { value: 8, label: 'September' },
+  { value: 9, label: 'October' },
+  { value: 10, label: 'November' },
+  { value: 11, label: 'December' }
+];
 
 @Component({
   selector: 'app-receipt-history-page',
@@ -19,9 +34,9 @@ import { ReceiptHistoryItem, ReceiptService } from '../../services/receipt.servi
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
+    MatSelectModule,
     MatButtonModule,
+    MatCheckboxModule,
     MatIconModule,
     MatPaginatorModule,
     CurrencyPipe,
@@ -38,10 +53,17 @@ export class ReceiptHistoryPageComponent {
   readonly loading = signal(false);
   readonly items = signal<ReceiptHistoryItem[]>([]);
   readonly feedback = signal('');
+  readonly categories = signal<ExpenseCategory[]>([]);
+
+  readonly months = MONTHS;
+  readonly years = this.buildYearOptions();
 
   readonly editingId = signal<string | null>(null);
   readonly editMerchant = signal('');
   readonly editAmount = signal<number | null>(null);
+
+  readonly selectedIds = signal<Set<string>>(new Set());
+  readonly deleting = signal(false);
 
   readonly filterForm;
 
@@ -51,10 +73,13 @@ export class ReceiptHistoryPageComponent {
   ) {
     this.filterForm = this.formBuilder.group({
       search: [''],
-      receiptDate: [null as Date | null]
+      categoryId: [''],
+      year: [''],
+      month: ['']
     });
 
     void this.loadPage();
+    void this.loadCategories();
   }
 
   async applyFilters(): Promise<void> {
@@ -63,7 +88,7 @@ export class ReceiptHistoryPageComponent {
   }
 
   async resetFilters(): Promise<void> {
-    this.filterForm.reset({ search: '', receiptDate: null });
+    this.filterForm.reset({ search: '', categoryId: '', year: '', month: '' });
     this.pageIndex.set(0);
     await this.loadPage();
   }
@@ -116,21 +141,107 @@ export class ReceiptHistoryPageComponent {
     this.editAmount.set(Number.isFinite(parsed) ? parsed : null);
   }
 
+  isSelected(item: ReceiptHistoryItem): boolean {
+    return this.selectedIds().has(item.id);
+  }
+
+  toggleSelection(item: ReceiptHistoryItem, checked: boolean): void {
+    const next = new Set(this.selectedIds());
+    if (checked) {
+      next.add(item.id);
+    } else {
+      next.delete(item.id);
+    }
+    this.selectedIds.set(next);
+  }
+
+  isAllSelected(): boolean {
+    const items = this.items();
+    return items.length > 0 && items.every((item) => this.selectedIds().has(item.id));
+  }
+
+  toggleSelectAll(checked: boolean): void {
+    this.selectedIds.set(checked ? new Set(this.items().map((item) => item.id)) : new Set());
+  }
+
+  async deleteReceipt(item: ReceiptHistoryItem): Promise<void> {
+    if (!confirm(`Delete the receipt from ${item.merchant_name || 'this merchant'}?`)) {
+      return;
+    }
+    await this.deleteByIds([item.id]);
+  }
+
+  async deleteSelected(): Promise<void> {
+    const ids = Array.from(this.selectedIds());
+    if (!ids.length) {
+      return;
+    }
+    if (!confirm(`Delete ${ids.length} selected receipt(s)?`)) {
+      return;
+    }
+    await this.deleteByIds(ids);
+  }
+
+  private async deleteByIds(ids: string[]): Promise<void> {
+    this.deleting.set(true);
+    const result = await this.receiptService.deleteReceipts(ids);
+    this.deleting.set(false);
+    this.feedback.set(result.message);
+
+    if (result.success) {
+      const next = new Set(this.selectedIds());
+      ids.forEach((id) => next.delete(id));
+      this.selectedIds.set(next);
+      await this.loadPage();
+    }
+  }
+
+  private async loadCategories(): Promise<void> {
+    this.categories.set(await this.receiptService.getCategories());
+  }
+
+  private buildYearOptions(): number[] {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 6 }, (_, index) => currentYear - index);
+  }
+
+  private resolveDateRange(
+    year: string | null,
+    month: string | null
+  ): { startDate?: string; endDate?: string } {
+    if (!year) {
+      return {};
+    }
+
+    const yearNumber = Number(year);
+    if (month === '' || month === null || month === undefined) {
+      return {
+        startDate: `${yearNumber}-01-01`,
+        endDate: `${yearNumber}-12-31`
+      };
+    }
+
+    const monthNumber = Number(month);
+    const startDate = new Date(Date.UTC(yearNumber, monthNumber, 1)).toISOString().slice(0, 10);
+    const endDate = new Date(Date.UTC(yearNumber, monthNumber + 1, 0)).toISOString().slice(0, 10);
+    return { startDate, endDate };
+  }
+
   private async loadPage(): Promise<void> {
     this.loading.set(true);
     this.feedback.set('');
+    this.selectedIds.set(new Set());
 
     const filters = this.filterForm.getRawValue();
-    const selectedDate = filters.receiptDate
-      ? new Date(filters.receiptDate).toISOString().slice(0, 10)
-      : undefined;
+    const { startDate, endDate } = this.resolveDateRange(filters.year, filters.month);
 
     const { items, total } = await this.receiptService.getReceiptHistory({
       page: this.pageIndex() + 1,
       pageSize: this.pageSize(),
       search: filters.search ?? undefined,
-      startDate: selectedDate,
-      endDate: selectedDate
+      categoryId: filters.categoryId ?? undefined,
+      startDate,
+      endDate
     });
 
     this.items.set(items);

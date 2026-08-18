@@ -7,16 +7,32 @@
       <h2 class="m-0 text-xl font-semibold">Upload Receipt</h2>
       <p class="mt-1 text-slate-600">
         Supported files: JPG, JPEG, PNG, PDF. Uploaded files are stored in private Supabase storage
-        and linked to the receipts table.
+        and linked to the receipts table. OCR extracts the merchant, date, totals, currency, and line items for review.
       </p>
     </div>
   </div>
 
   <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
     <input #fileInput type="file" accept=".jpg,.jpeg,.png,.pdf" class="hidden" (change)="onFileSelected($event)" aria-label="Select receipt file" />
+    <input
+      #cameraInput
+      type="file"
+      accept="image/*"
+      capture="environment"
+      class="hidden"
+      (change)="onFileSelected($event)"
+      aria-label="Scan receipt with camera"
+    />
 
     <button mat-stroked-button color="primary" type="button" class="!h-11 !rounded-xl !px-4" (click)="fileInput.click()">
       Choose Receipt File
+    </button>
+
+    <button mat-stroked-button color="primary" type="button" class="!h-11 !rounded-xl !px-4" (click)="cameraInput.click()">
+      <span class="inline-flex items-center gap-2">
+        <mat-icon>photo_camera</mat-icon>
+        Scan with Camera
+      </span>
     </button>
 
     <p class="text-sm text-slate-600" *ngIf="selectedFile(); else noFile">{{ selectedFile()!.name }}</p>
@@ -50,5 +66,9 @@
       <span>{{ uploadSuccess() ? '✓' : '!' }}</span>
       <span>{{ uploadMessage() }}</span>
     </div>
+  }
+
+  @if (ocrStatus() === 'processing') {
+    <p class="mt-2 text-sm text-slate-600" aria-live="polite">OCR status: processing</p>
   }
 </mat-card>

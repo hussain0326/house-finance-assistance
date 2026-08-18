@@ -9,7 +9,12 @@ describe('ReceiptPageComponent', () => {
     receiptService = {
       uploadReceipt: jasmine.createSpy('uploadReceipt').and.resolveTo({
         success: true,
-        message: 'ok'
+        message: 'ok',
+        receiptId: 'receipt-1'
+      }),
+      processReceipt: jasmine.createSpy('processReceipt').and.resolveTo({
+        success: true,
+        message: 'processing'
       })
     };
 

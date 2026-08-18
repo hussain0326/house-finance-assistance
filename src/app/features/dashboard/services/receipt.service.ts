@@ -4,6 +4,7 @@ import { SupabaseService } from '../../../core/supabase/supabase.service';
 type UploadResult = {
   success: boolean;
   message: string;
+  receiptId?: string;
 };
 
 export type ReceiptUploadInput = {
@@ -22,6 +23,9 @@ export type ReceiptHistoryItem = {
   currency: string;
   processing_status: string;
   created_at: string;
+  category_id: string | null;
+  category_name: string | null;
+  category_color: string | null;
   total_count: number;
   signed_image_url?: string;
 };
@@ -33,6 +37,7 @@ export type ReceiptHistoryQuery = {
   status?: string;
   startDate?: string;
   endDate?: string;
+  categoryId?: string;
 };
 
 export type DashboardSummary = {
@@ -45,6 +50,49 @@ export type DashboardTrendPoint = {
   month_label: string;
   month_date: string;
   total_amount: number;
+};
+
+export type ExpenseCategory = {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+};
+
+export type AnalyticsCategoryPoint = {
+  category_name: string;
+  total_amount: number;
+  color?: string | null;
+};
+
+export type AnalyticsMonthPoint = {
+  month_label: string;
+  month_date: string;
+  total_amount: number;
+};
+
+export type SpendingAnalytics = {
+  category_breakdown: AnalyticsCategoryPoint[];
+  monthly_comparison: AnalyticsMonthPoint[];
+};
+
+export type FilteredAnalyticsQuery = {
+  merchant?: string;
+  categoryId?: string;
+  startDate?: string;
+  endDate?: string;
+};
+
+export type FilteredAnalyticsMonth = {
+  month_label: string;
+  month_date: string;
+  total_amount: number;
+};
+
+export type FilteredAnalyticsResult = {
+  total_amount: number;
+  receipt_count: number;
+  monthly_breakdown: FilteredAnalyticsMonth[];
 };
 
 @Injectable({
@@ -88,6 +136,112 @@ export class ReceiptService {
     }));
   }
 
+  async getCategories(): Promise<ExpenseCategory[]> {
+    const { data, error } = await this.supabaseService.client
+      .from('categories')
+      .select('id, name, icon, color')
+      .order('name');
+
+    if (error || !data) {
+      return [];
+    }
+
+    return data as ExpenseCategory[];
+  }
+
+  async getSpendingAnalytics(monthsBack = 7): Promise<SpendingAnalytics> {
+    const { data, error } = await this.supabaseService.client.rpc('get_spending_analytics', {
+      months_back: monthsBack
+    });
+
+    if (error || !data) {
+      return { category_breakdown: [], monthly_comparison: [] };
+    }
+
+    const result = data as Partial<SpendingAnalytics>;
+    return {
+      category_breakdown: (result.category_breakdown ?? []).map((item) => ({
+        ...item,
+        total_amount: Number(item.total_amount ?? 0)
+      })),
+      monthly_comparison: (result.monthly_comparison ?? []).map((item) => ({
+        ...item,
+        total_amount: Number(item.total_amount ?? 0)
+      }))
+    };
+  }
+
+  async getFilteredAnalytics(query: FilteredAnalyticsQuery): Promise<FilteredAnalyticsResult> {
+    const { data, error } = await this.supabaseService.client.rpc('get_filtered_analytics', {
+      p_merchant: query.merchant?.trim() ? query.merchant.trim() : null,
+      p_category_id: query.categoryId || null,
+      p_start_date: query.startDate ?? null,
+      p_end_date: query.endDate ?? null
+    });
+
+    if (error || !data) {
+      return { total_amount: 0, receipt_count: 0, monthly_breakdown: [] };
+    }
+
+    const result = data as Partial<FilteredAnalyticsResult>;
+    return {
+      total_amount: Number(result.total_amount ?? 0),
+      receipt_count: Number(result.receipt_count ?? 0),
+      monthly_breakdown: (result.monthly_breakdown ?? []).map((item) => ({
+        ...item,
+        total_amount: Number(item.total_amount ?? 0)
+      }))
+    };
+  }
+
+  async processReceipt(receiptId: string): Promise<{
+    success: boolean;
+    message: string;
+    receipt?: { merchant: string | null; date: string | null; currency: string | null; totalAmount: number | null };
+  }> {
+    try {
+      const { data, error } = await this.supabaseService.client.functions.invoke('process-receipt', {
+        body: { receiptId }
+      });
+
+      if (error) {
+        const details = await this.readFunctionError(error);
+        return {
+          success: false,
+          message: details
+            ? `Receipt uploaded, but OCR processing failed: ${details}`
+            : 'Receipt uploaded, but OCR processing failed.'
+        };
+      }
+
+      return {
+        success: true,
+        message: 'Receipt processed. Merchant, date, totals, and currency have been saved.',
+        receipt: data?.receipt
+      };
+    } catch (error) {
+      const details = error instanceof Error ? error.message : 'Unexpected OCR processing error.';
+      return { success: false, message: `Receipt uploaded, but OCR processing failed: ${details}` };
+    }
+  }
+
+  private async readFunctionError(error: { message?: string; context?: Response }): Promise<string> {
+    const response = error.context;
+    if (response) {
+      try {
+        const payload = (await response.clone().json()) as { error?: string; message?: string };
+        const responseMessage = payload.error ?? payload.message;
+        if (responseMessage) {
+          return responseMessage;
+        }
+      } catch {
+        // Fall back to the SDK error when the function did not return JSON.
+      }
+    }
+
+    return error.message?.trim() ?? '';
+  }
+
   async getReceiptHistory(query: ReceiptHistoryQuery): Promise<{ items: ReceiptHistoryItem[]; total: number }> {
     const { data, error } = await this.supabaseService.client.rpc('get_receipt_history', {
       p_page: query.page,
@@ -95,7 +249,8 @@ export class ReceiptService {
       p_search: query.search?.trim() ? query.search.trim() : null,
       p_status: query.status?.trim() ? query.status.trim() : null,
       p_start_date: query.startDate ?? null,
-      p_end_date: query.endDate ?? null
+      p_end_date: query.endDate ?? null,
+      p_category_id: query.categoryId || null
     });
 
     if (error || !data) {
@@ -175,7 +330,8 @@ export class ReceiptService {
 
     return {
       success: true,
-      message: 'Receipt uploaded successfully.'
+      message: 'Receipt uploaded successfully.',
+      receiptId
     };
   }
 
@@ -205,6 +361,40 @@ export class ReceiptService {
     }
 
     return { success: true, message: 'Receipt details updated.' };
+  }
+
+  async deleteReceipts(receiptIds: string[]): Promise<{ success: boolean; message: string }> {
+    if (!receiptIds.length) {
+      return { success: false, message: 'No receipts selected.' };
+    }
+
+    const { data: rows, error: fetchError } = await this.supabaseService.client
+      .from('receipts')
+      .select('id, image_url')
+      .in('id', receiptIds);
+
+    if (fetchError) {
+      return { success: false, message: fetchError.message };
+    }
+
+    const imagePaths = (rows ?? []).map((row) => row.image_url).filter(Boolean);
+    if (imagePaths.length) {
+      await this.supabaseService.client.storage.from(this.bucketName).remove(imagePaths);
+    }
+
+    const { error: deleteError } = await this.supabaseService.client
+      .from('receipts')
+      .delete()
+      .in('id', receiptIds);
+
+    if (deleteError) {
+      return { success: false, message: deleteError.message };
+    }
+
+    return {
+      success: true,
+      message: receiptIds.length === 1 ? 'Receipt deleted.' : `${receiptIds.length} receipts deleted.`
+    };
   }
 
   private extractFileExtension(fileName: string): string {
