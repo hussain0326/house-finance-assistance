@@ -1,4 +1,65 @@
-<mat-card appearance="outlined" class="p-4">
-  <h2 class="m-0 text-xl font-semibold">Settings</h2>
-  <p class="mt-2 text-slate-600">Profile, preferences, and integrations settings placeholder.</p>
-</mat-card>
+<section class="settings-layout">
+  <mat-card appearance="outlined" class="settings-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>account_circle</mat-icon>
+      <mat-card-title>Profile</mat-card-title>
+      <mat-card-subtitle>{{ profile.email || 'Account details' }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form class="settings-form" [formGroup]="form" (ngSubmit)="saveProfile()">
+        <mat-form-field appearance="outline">
+          <mat-label>First name</mat-label>
+          <input matInput formControlName="firstName" autocomplete="given-name" />
+          @if (form.controls.firstName.hasError('required')) {
+            <mat-error>First name is required.</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Last name</mat-label>
+          <input matInput formControlName="lastName" autocomplete="family-name" />
+          @if (form.controls.lastName.hasError('required')) {
+            <mat-error>Last name is required.</mat-error>
+          }
+        </mat-form-field>
+        <p class="settings-feedback" aria-live="polite">{{ feedback() }}</p>
+        <button mat-flat-button color="primary" type="submit" [disabled]="isSaving()">
+          Save profile
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="settings-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>shield</mat-icon>
+      <mat-card-title>Account security</mat-card-title>
+      <mat-card-subtitle>Choose a new password to protect your account.</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form class="settings-form" [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+        <mat-form-field appearance="outline">
+          <mat-label>New password</mat-label>
+          <input matInput formControlName="password" autocomplete="new-password" type="password" />
+          @if (passwordForm.controls.password.hasError('required')) {
+            <mat-error>New password is required.</mat-error>
+          } @else if (passwordForm.controls.password.hasError('pattern')) {
+            <mat-error>Use 8+ characters with uppercase, lowercase, a number, and a symbol.</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Confirm new password</mat-label>
+          <input matInput formControlName="confirmPassword" autocomplete="new-password" type="password" />
+          @if (passwordForm.controls.confirmPassword.hasError('required')) {
+            <mat-error>Please confirm your new password.</mat-error>
+          } @else if (passwordForm.controls.confirmPassword.hasError('passwordMismatch')) {
+            <mat-error>Passwords do not match.</mat-error>
+          }
+        </mat-form-field>
+        <p class="settings-feedback" aria-live="polite">{{ passwordFeedback() }}</p>
+        <button mat-flat-button color="primary" type="submit" [disabled]="isChangingPassword()">
+          Update password
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</section>

@@ -9,15 +9,27 @@ export type AuthActionResult = {
   message?: string;
 };
 
+export type UserProfile = {
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly email: string;
+};
+
+export const STRONG_PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+export const STRONG_PASSWORD_MESSAGE =
+  'Use at least 8 characters with uppercase, lowercase, a number, and a symbol.';
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private readonly sessionSignal = signal<Session | null>(null);
   private readonly loadingSignal = signal(true);
+  private readonly passwordRecoverySignal = signal(false);
 
   readonly session = this.sessionSignal.asReadonly();
   readonly isLoading = this.loadingSignal.asReadonly();
+  readonly isPasswordRecovery = this.passwordRecoverySignal.asReadonly();
 
   constructor(
     private readonly supabaseService: SupabaseService,
@@ -39,7 +51,23 @@ export class AuthService {
     return { error: this.mapAuthError(error?.message) };
   }
 
-  async signUp(email: string, password: string): Promise<AuthActionResult> {
+  getProfile(): UserProfile {
+    const user = this.sessionSignal()?.user;
+    const metadata = user?.user_metadata ?? {};
+
+    return {
+      firstName: typeof metadata['first_name'] === 'string' ? metadata['first_name'] : '',
+      lastName: typeof metadata['last_name'] === 'string' ? metadata['last_name'] : '',
+      email: user?.email ?? ''
+    };
+  }
+
+  async signUp(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string
+  ): Promise<AuthActionResult> {
     if (!this.isConfigurationReady()) {
       return { error: this.getConfigurationError() };
     }
@@ -48,7 +76,13 @@ export class AuthService {
     const { data, error } = await this.supabaseService.client.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo }
+      options: {
+        emailRedirectTo,
+        data: {
+          first_name: firstName.trim(),
+          last_name: lastName.trim()
+        }
+      }
     });
     if (error) {
       return { error: this.mapAuthError(error.message) };
@@ -84,6 +118,39 @@ export class AuthService {
     };
   }
 
+  async updatePassword(password: string): Promise<AuthActionResult> {
+    if (!this.isConfigurationReady()) {
+      return { error: this.getConfigurationError() };
+    }
+
+    const { error } = await this.supabaseService.client.auth.updateUser({ password });
+    if (error) {
+      return { error: this.mapAuthError(error.message) };
+    }
+
+    this.passwordRecoverySignal.set(false);
+    return { error: null, message: 'Password updated successfully.' };
+  }
+
+  async updateProfile(firstName: string, lastName: string): Promise<AuthActionResult> {
+    if (!this.isConfigurationReady()) {
+      return { error: this.getConfigurationError() };
+    }
+
+    const { data, error } = await this.supabaseService.client.auth.updateUser({
+      data: {
+        first_name: firstName.trim(),
+        last_name: lastName.trim()
+      }
+    });
+    if (error) {
+      return { error: this.mapAuthError(error.message) };
+    }
+
+    this.sessionSignal.update((session) => (session && data.user ? { ...session, user: data.user } : session));
+    return { error: null, message: 'Profile updated.' };
+  }
+
   async testConnection(): Promise<{ ok: boolean; details: string }> {
     if (!this.isConfigurationReady()) {
       return { ok: false, details: this.getConfigurationError() };
@@ -107,6 +174,8 @@ export class AuthService {
       return;
     }
 
+    this.passwordRecoverySignal.set(this.isPasswordRecoveryCallback());
+
     const {
       data: { session }
     } = await this.supabaseService.client.auth.getSession();
@@ -122,9 +191,23 @@ export class AuthService {
     this.sessionSignal.set(currentSession);
     this.loadingSignal.set(false);
 
+    if (event === 'PASSWORD_RECOVERY') {
+      this.passwordRecoverySignal.set(true);
+      return;
+    }
+
     if (event === 'SIGNED_IN' && this.router.url === '/auth') {
       void this.router.navigate(['/app/dashboard']);
     }
+  }
+
+  private isPasswordRecoveryCallback(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    const parameters = new URLSearchParams(window.location.hash.slice(1));
+    return parameters.get('type') === 'recovery';
   }
 
   private mapAuthError(rawMessage: string | undefined): string | null {
@@ -142,8 +225,8 @@ export class AuthService {
     if (value.includes('already registered')) {
       return 'An account with this email already exists. Try signing in.';
     }
-    if (value.includes('password should be at least')) {
-      return 'Password must be at least 8 characters long.';
+    if (value.includes('password should be at least') || value.includes('password is too weak')) {
+      return STRONG_PASSWORD_MESSAGE;
     }
     if (value.includes('for security purposes')) {
       return 'Too many attempts. Please wait and try again.';

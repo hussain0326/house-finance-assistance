@@ -7,32 +7,57 @@
           <span>{{ heading() }}</span>
         </mat-card-title>
         <mat-card-subtitle>
-          Securely manage your household spending across devices.
+          @if (isForgotPassword()) {
+            Enter your email and we will send you a password reset link.
+          } @else if (isPasswordRecovery()) {
+            Choose a new password for your account.
+          } @else {
+            Securely manage your household spending across devices.
+          }
         </mat-card-subtitle>
       </mat-card-header>
 
       <mat-card-content class="mt-4">
         <form class="flex flex-col gap-3" [formGroup]="form" (ngSubmit)="submit()" aria-label="Authentication form">
-          <mat-form-field appearance="outline">
-            <mat-label>Email</mat-label>
-            <input matInput formControlName="email" autocomplete="email" type="email" />
-            <mat-error *ngIf="form.controls.email.hasError('required')">Email is required.</mat-error>
-            <mat-error *ngIf="form.controls.email.hasError('email')">Enter a valid email.</mat-error>
-          </mat-form-field>
+          @if (!isPasswordRecovery()) {
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" autocomplete="email" type="email" />
+              <mat-error *ngIf="form.controls.email.hasError('required')">Email is required.</mat-error>
+              <mat-error *ngIf="form.controls.email.hasError('email')">Enter a valid email.</mat-error>
+            </mat-form-field>
+          }
 
-          <mat-form-field appearance="outline">
-            <mat-label>Password</mat-label>
-            <input
-              matInput
-              formControlName="password"
-              autocomplete="current-password"
-              type="password"
-            />
-            <mat-error *ngIf="form.controls.password.hasError('required')">Password is required.</mat-error>
-            <mat-error *ngIf="form.controls.password.hasError('minlength')">
-              Password must be at least 8 characters.
-            </mat-error>
-          </mat-form-field>
+          @if (!isPasswordRecovery() && !isForgotPassword() && !isSignInMode()) {
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <mat-form-field appearance="outline">
+                <mat-label>First name</mat-label>
+                <input matInput formControlName="firstName" autocomplete="given-name" />
+                <mat-error *ngIf="form.controls.firstName.hasError('required')">First name is required.</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Last name</mat-label>
+                <input matInput formControlName="lastName" autocomplete="family-name" />
+                <mat-error *ngIf="form.controls.lastName.hasError('required')">Last name is required.</mat-error>
+              </mat-form-field>
+            </div>
+          }
+
+          @if (!isForgotPassword()) {
+            <mat-form-field appearance="outline">
+              <mat-label>{{ isPasswordRecovery() ? 'New password' : 'Password' }}</mat-label>
+              <input
+                matInput
+                formControlName="password"
+                [autocomplete]="isPasswordRecovery() ? 'new-password' : 'current-password'"
+                type="password"
+              />
+              <mat-error *ngIf="form.controls.password.hasError('required')">Password is required.</mat-error>
+              <mat-error *ngIf="form.controls.password.hasError('pattern')">
+                Use 8+ characters with uppercase, lowercase, a number, and a symbol.
+              </mat-error>
+            </mat-form-field>
+          }
 
           <p class="min-h-6 text-sm text-red-700" aria-live="polite">{{ feedback() }}</p>
 
@@ -56,8 +81,8 @@
               type="button"
               class="self-start"
               [disabled]="isSubmitting()"
-              (click)="sendPasswordReset()"
-              aria-label="Send password reset email"
+              (click)="openForgotPassword()"
+              aria-label="Open password reset form"
             >
               Forgot password?
             </button>
@@ -66,9 +91,15 @@
       </mat-card-content>
 
       <mat-card-actions>
-        <button mat-button type="button" (click)="toggleMode()" aria-label="Switch authentication mode">
-          {{ isSignInMode() ? 'Need an account? Sign up' : 'Already have an account? Sign in' }}
-        </button>
+        @if (isForgotPassword() || isPasswordRecovery()) {
+          <button mat-button type="button" (click)="returnToSignIn()" aria-label="Return to sign in">
+            Back to sign in
+          </button>
+        } @else {
+          <button mat-button type="button" (click)="toggleMode()" aria-label="Switch authentication mode">
+            {{ isSignInMode() ? 'Need an account? Sign up' : 'Already have an account? Sign in' }}
+          </button>
+        }
       </mat-card-actions>
     </mat-card>
   </section>

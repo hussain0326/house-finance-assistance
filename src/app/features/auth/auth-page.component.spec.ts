@@ -13,6 +13,8 @@ describe('AuthPageComponent', () => {
       requestPasswordReset: jasmine
         .createSpy('requestPasswordReset')
         .and.resolveTo({ error: null, message: 'reset' }),
+      updatePassword: jasmine.createSpy('updatePassword').and.resolveTo({ error: null }),
+      isPasswordRecovery: jasmine.createSpy('isPasswordRecovery').and.returnValue(false),
       testConnection: jasmine.createSpy('testConnection').and.resolveTo({ ok: true, details: 'ok' }),
       getResolvedSupabaseUrl: jasmine.createSpy('getResolvedSupabaseUrl').and.returnValue('https://demo')
     };
@@ -36,5 +38,17 @@ describe('AuthPageComponent', () => {
     component.toggleMode();
 
     expect(component.isSignInMode()).toBeFalse();
+  });
+
+  it('should open an email-only password reset flow', async () => {
+    const fixture = TestBed.createComponent(AuthPageComponent);
+    const component = fixture.componentInstance;
+    component.openForgotPassword();
+    component.form.controls.email.setValue('user@example.com');
+
+    await component.submit();
+
+    expect(component.isForgotPassword()).toBeTrue();
+    expect(authService.requestPasswordReset).toHaveBeenCalledWith('user@example.com');
   });
 });

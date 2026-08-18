@@ -17,7 +17,15 @@ describe('DashboardPageComponent', () => {
       })
     };
 
-    const component = new DashboardPageComponent(receiptService as any);
+    const authService = {
+      getProfile: jasmine.createSpy('getProfile').and.returnValue({
+        firstName: 'Alex',
+        lastName: 'Morgan',
+        email: 'alex@example.com'
+      })
+    };
+
+    const component = new DashboardPageComponent(receiptService as any, authService as any);
     expect(component).toBeTruthy();
   });
 });

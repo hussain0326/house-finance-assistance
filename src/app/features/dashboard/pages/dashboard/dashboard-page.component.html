@@ -1,3 +1,10 @@
+<section class="mb-5">
+  <h2 class="m-0 text-2xl font-semibold text-slate-900">
+    Welcome back{{ profile().firstName ? ', ' + profile().firstName : '' }}
+  </h2>
+  <p class="mb-0 mt-1 text-sm text-slate-600">Here is your spending snapshot.</p>
+</section>
+
 <section class="grid gap-4 md:grid-cols-3" aria-label="Spending summary cards">
   <mat-card class="summary-card elevated-card" appearance="outlined">
     <mat-card-header>

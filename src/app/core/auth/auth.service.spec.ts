@@ -11,6 +11,7 @@ describe('AuthService', () => {
       signInWithPassword: jasmine.createSpy('signInWithPassword').and.resolveTo({ error: null }),
       signUp: jasmine.createSpy('signUp').and.resolveTo({ data: { session: null }, error: null }),
       resetPasswordForEmail: jasmine.createSpy('resetPasswordForEmail').and.resolveTo({ error: null }),
+      updateUser: jasmine.createSpy('updateUser').and.resolveTo({ error: null }),
       signOut: jasmine.createSpy('signOut').and.resolveTo({}),
       getSession: jasmine.createSpy('getSession').and.resolveTo({ data: { session: null } }),
       onAuthStateChange: jasmine.createSpy('onAuthStateChange').and.callFake(() => ({
@@ -47,10 +48,17 @@ describe('AuthService', () => {
   });
 
   it('should return confirmation-required message on sign up when no session', async () => {
-    const result = await service.signUp('a@b.com', 'password123');
+    const result = await service.signUp('a@b.com', 'password123', 'Alex', 'Morgan');
 
     expect(result.error).toBeNull();
     expect(result.needsEmailConfirmation).toBeTrue();
+  });
+
+  it('should update the password after a recovery link is opened', async () => {
+    const result = await service.updatePassword('new-password123');
+
+    expect(mockAuth.updateUser).toHaveBeenCalledWith({ password: 'new-password123' });
+    expect(result.error).toBeNull();
   });
 
   it('should proxy testConnection', async () => {

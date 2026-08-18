@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import { EChartsCoreOption } from 'echarts/core';
 import { ReceiptService } from '../../services/receipt.service';
+import { AuthService } from '../../../../core/auth/auth.service';
 
 type Expense = {
   readonly merchant: string;
@@ -26,6 +27,8 @@ export class DashboardPageComponent {
   readonly avgSpend = signal(0);
   readonly loading = signal(true);
   readonly recentExpenses = signal<Expense[]>([]);
+
+  readonly profile = () => this.authService.getProfile();
 
   readonly trendChartOptions = signal<EChartsCoreOption>({
     tooltip: {
@@ -57,7 +60,10 @@ export class DashboardPageComponent {
     }
   });
 
-  constructor(private readonly receiptService: ReceiptService) {
+  constructor(
+    private readonly receiptService: ReceiptService,
+    private readonly authService: AuthService
+  ) {
     void this.loadDashboard();
   }
 
