@@ -290,9 +290,17 @@ export class ReceiptService {
     const extension = this.extractFileExtension(file.name);
     const filePath = `${user.id}/${receiptId}.${extension}`;
 
+    // Read into memory before upload: some mobile browsers (iOS Safari/Chrome)
+    // send a 0-byte body when a File object is passed directly as the fetch body.
+    const fileBuffer = await file.arrayBuffer();
+    if (fileBuffer.byteLength === 0) {
+      return { success: false, message: 'The selected file is empty. Please retake the photo and try again.' };
+    }
+
     const { error: uploadError } = await this.supabaseService.client.storage
       .from(this.bucketName)
-      .upload(filePath, file, {
+      .upload(filePath, fileBuffer, {
+        contentType: file.type || 'image/jpeg',
         upsert: false,
         cacheControl: '3600'
       });
