@@ -34,8 +34,6 @@ yarn-error.log
 .env.development
 .env.production
 .env.*.local
-src/environments/environment.ts
-src/environments/environment.prod.ts
 
 # Miscellaneous
 /.angular/cache
