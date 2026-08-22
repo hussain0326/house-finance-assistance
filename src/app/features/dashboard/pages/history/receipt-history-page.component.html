@@ -123,6 +123,27 @@
                 />
                 <input
                   class="edit-input"
+                  [value]="editAddress()"
+                  (input)="onEditAddressChange($any($event.target).value)"
+                  aria-label="Edit merchant address"
+                  placeholder="Address"
+                />
+                <input
+                  class="edit-input"
+                  [value]="editCity()"
+                  (input)="onEditCityChange($any($event.target).value)"
+                  aria-label="Edit merchant city"
+                  placeholder="City"
+                />
+                <input
+                  class="edit-input"
+                  [value]="editPostalCode()"
+                  (input)="onEditPostalCodeChange($any($event.target).value)"
+                  aria-label="Edit postal code"
+                  placeholder="Postal code"
+                />
+                <input
+                  class="edit-input"
                   [value]="editAmount() ?? ''"
                   (input)="onEditAmountChange($any($event.target).value)"
                   type="number"
@@ -148,6 +169,17 @@
                     <option [value]="category.id">{{ category.name }}</option>
                   }
                 </select>
+                <select
+                  class="edit-input"
+                  [value]="editCountryCode() ?? ''"
+                  (change)="onEditCountryChange($any($event.target).value)"
+                  aria-label="Edit receipt country"
+                >
+                  <option value="">No country</option>
+                  @for (country of countries(); track country.code) {
+                    <option [value]="country.code">{{ country.name }}</option>
+                  }
+                </select>
                 <div class="edit-actions">
                   <button mat-stroked-button color="primary" type="button" (click)="saveEdit(item)">Save</button>
                   <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
@@ -162,7 +194,18 @@
               @if (item.category_name) {
                 • <span [style.color]="item.category_color || undefined">{{ item.category_name }}</span>
               }
+              @if (item.country_name) {
+                • {{ item.country_name }}
+              }
             </p>
+            @if (item.merchant_address || item.merchant_city || item.merchant_postal_code) {
+              <p class="m-0 text-xs text-slate-500">
+                {{ item.merchant_address }}
+                @if (item.merchant_postal_code || item.merchant_city) {
+                  • {{ item.merchant_postal_code }} {{ item.merchant_city }}
+                }
+              </p>
+            }
             <p class="m-0 text-xs text-slate-500">Receipt ID: {{ item.id }}</p>
             @if (editingId() !== item.id) {
               <button class="mt-2" mat-button type="button" (click)="startEdit(item)">Edit details</button>

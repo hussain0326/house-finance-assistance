@@ -57,7 +57,7 @@
       </div>
     </div>
 
-    <form class="mt-4 grid gap-3 md:grid-cols-4" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+    <form class="mt-4 grid gap-3 md:grid-cols-5" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
       <mat-form-field appearance="outline">
         <mat-label>Merchant</mat-label>
         <input matInput formControlName="merchant" placeholder="Aldi, H&M..." />
@@ -69,6 +69,16 @@
           <mat-option value="">All categories</mat-option>
           @for (category of categories(); track category.id) {
             <mat-option [value]="category.id">{{ category.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Country</mat-label>
+        <mat-select formControlName="countryCode">
+          <mat-option value="">All countries</mat-option>
+          @for (country of countries(); track country.code) {
+            <mat-option [value]="country.code">{{ country.name }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
@@ -93,11 +103,23 @@
         </mat-select>
       </mat-form-field>
 
-      <div class="md:col-span-4 flex flex-wrap gap-2">
+      <div class="md:col-span-5 flex flex-wrap gap-2">
         <button mat-flat-button color="primary" type="submit" [disabled]="filterLoading()">Apply Filters</button>
         <button mat-button type="button" (click)="resetFilters()" [disabled]="filterLoading()">Reset</button>
       </div>
     </form>
+
+    @if (countryBreakdown().length) {
+      <div class="mt-4 grid gap-2">
+        <h3 class="m-0 text-base font-semibold">Spending by Country</h3>
+        @for (country of countryBreakdown(); track country.country_code) {
+          <div class="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm">
+            <span>{{ country.country_name }}</span>
+            <span class="font-semibold">{{ country.total_amount | currency: currencyCode() }}</span>
+          </div>
+        }
+      </div>
+    }
 
     @if (filterApplied()) {
       <div class="mt-4 grid gap-3 sm:grid-cols-2">

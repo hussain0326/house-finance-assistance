@@ -11,6 +11,8 @@ import { EChartsCoreOption } from 'echarts/core';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import { AuthService } from '../../../../core/auth/auth.service';
 import {
+  AnalyticsCountryPoint,
+  ExpenseCountry,
   ExpenseCategory,
   FilteredAnalyticsMonth,
   ReceiptService
@@ -56,6 +58,7 @@ export class AnalyticsPageComponent {
   readonly currencyCode = () => this.authService?.getProfile().defaultCurrency ?? 'EUR';
 
   readonly categories = signal<ExpenseCategory[]>([]);
+  readonly countries = signal<ExpenseCountry[]>([]);
   readonly months = MONTHS;
   readonly years = this.buildYearOptions();
 
@@ -65,6 +68,7 @@ export class AnalyticsPageComponent {
   readonly filterTotal = signal(0);
   readonly filterCount = signal(0);
   readonly filterBreakdown = signal<FilteredAnalyticsMonth[]>([]);
+  readonly countryBreakdown = signal<AnalyticsCountryPoint[]>([]);
   readonly filterFeedback = signal('');
 
   readonly categoryChartOptions = signal<EChartsCoreOption>({
@@ -116,6 +120,7 @@ export class AnalyticsPageComponent {
     this.filterForm = (this.formBuilder ?? new FormBuilder()).group({
       merchant: [''],
       categoryId: [''],
+      countryCode: [''],
       year: [''],
       month: ['']
     });
@@ -123,6 +128,7 @@ export class AnalyticsPageComponent {
     if (receiptService) {
       void this.loadAnalytics();
       void this.loadCategories();
+      void this.loadCountries();
     }
   }
 
@@ -136,6 +142,7 @@ export class AnalyticsPageComponent {
     const result = await this.receiptService!.getFilteredAnalytics({
       merchant: filters.merchant ?? undefined,
       categoryId: filters.categoryId ?? undefined,
+      countryCode: filters.countryCode ?? undefined,
       startDate,
       endDate
     });
@@ -152,7 +159,7 @@ export class AnalyticsPageComponent {
   }
 
   resetFilters(): void {
-    this.filterForm.reset({ merchant: '', categoryId: '', year: '', month: '' });
+    this.filterForm.reset({ merchant: '', categoryId: '', countryCode: '', year: '', month: '' });
     this.filterApplied.set(false);
     this.filterFeedback.set('');
     this.filterBreakdown.set([]);
@@ -191,6 +198,10 @@ export class AnalyticsPageComponent {
     this.categories.set(await this.receiptService!.getCategories());
   }
 
+  private async loadCountries(): Promise<void> {
+    this.countries.set(await this.receiptService!.getCountries());
+  }
+
   private async loadAnalytics(): Promise<void> {
     const result = await this.receiptService!.getSpendingAnalytics();
     const categoryData = result.category_breakdown.map((item) => ({
@@ -200,6 +211,7 @@ export class AnalyticsPageComponent {
     }));
 
     this.categoryTotal.set(categoryData.reduce((total, item) => total + Number(item.value), 0));
+    this.countryBreakdown.set(result.country_breakdown);
     this.monthlyTotal.set(
       result.monthly_comparison.at(-1)?.total_amount ?? 0
     );

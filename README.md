@@ -11,6 +11,7 @@ The app is designed as a small fintech-style dashboard with authentication, priv
 - Process receipts with an OpenAI-backed Supabase Edge Function.
 - Extract merchant, receipt date, amount, currency, and category.
 - Preserve the original receipt amount/currency and convert reports to the user's default currency.
+- Track receipt country for travel spending and country-based analytics.
 - Refresh exchange rates daily and use the latest stored rates for analytics.
 - Browse receipt history and correct OCR mistakes such as merchant, amount, date, and category.
 - View dashboard summaries, category breakdowns, monthly trends, and filtered analytics.
@@ -43,9 +44,10 @@ Receipt processing follows this flow:
 3. The `process-receipt` Edge Function downloads the file.
 4. Images are processed through OpenAI vision input; PDFs are processed through OpenAI document input.
 5. The function extracts receipt fields and applies deterministic category keyword rules.
-6. The original receipt amount/currency are preserved.
-7. Reported amounts are converted using live rates stored in Supabase.
-8. The user can correct OCR mistakes in Receipt History.
+6. The function detects receipt country from address, merchant, language, and currency clues.
+7. The original receipt amount/currency are preserved.
+8. Reported amounts are converted using live rates stored in Supabase.
+9. The user can correct OCR mistakes in Receipt History.
 
 ## Currency Conversion
 
@@ -79,6 +81,19 @@ Examples:
 - `Subscriptions`: GitHub, Microsoft, Apple, Google, iCloud, Dropbox, Adobe
 
 Users can correct category mistakes from Receipt History.
+
+## Country Tracking
+
+Receipts store both `country_code` and `country_name` so travel spending can be filtered and summarized independently from currency.
+
+Country detection combines AI extraction with deterministic rules. Examples:
+
+- København, Danmark, or DKK -> Denmark (`DK`)
+- Berlin, Deutschland, or GmbH merchant names -> Germany (`DE`)
+- Paris or France -> France (`FR`)
+- London, UK, or GBP -> United Kingdom (`GB`)
+
+Analytics includes a country filter and a Spending by Country summary. The AI assistant can also answer questions such as "How much did I spend in Denmark?" using the same country filter.
 
 ## User Help
 
@@ -138,7 +153,30 @@ The Angular app expects Supabase configuration in the environment files:
 - `src/environments/environment.ts`
 - `src/environments/environment.prod.ts`
 
-Configure `appUrl` in the production environment to the deployed app origin. Password reset and email confirmation links use `${appUrl}/auth` in production and `window.location.origin` locally.
+Runtime configuration is generated before `start`, `build`, `watch`, and `test` by `scripts/write-env.mjs`.
+
+Create a local `.env.local` file from `.env.example`:
+
+```bash
+cp .env.example .env.local
+```
+
+Set these values locally and in Vercel project environment variables:
+
+```text
+SUPABASE_URL=https://dzrpnyxyxhtvowgcvoco.supabase.co
+SUPABASE_ANON_KEY=your Supabase publishable key
+APP_URL=https://hussain-home-finance-assistance.vercel.app
+```
+
+The generated Angular files are ignored by Git:
+
+```text
+src/environments/environment.generated.ts
+src/environments/environment.generated.prod.ts
+```
+
+Password reset and email confirmation links use `${APP_URL}/auth` in production and `window.location.origin` locally when `LOCAL_APP_URL` is empty.
 
 The Supabase Auth dashboard must also allow the same production callback URL:
 

@@ -19,7 +19,8 @@ describe('ReceiptHistoryPageComponent', () => {
         success: true,
         message: 'Receipt deleted.'
       }),
-      getCategories: jasmine.createSpy('getCategories').and.resolveTo([])
+      getCategories: jasmine.createSpy('getCategories').and.resolveTo([]),
+      getCountries: jasmine.createSpy('getCountries').and.resolveTo([{ code: 'DK', name: 'Denmark' }])
     };
 
     await TestBed.configureTestingModule({
@@ -62,25 +63,39 @@ describe('ReceiptHistoryPageComponent', () => {
     const item = {
       id: 'receipt-1',
       merchant_name: 'Old merchant',
+      merchant_address: 'Old street 1',
+      merchant_city: 'Old city',
+      merchant_postal_code: '1000',
       total_amount: 12,
       receipt_date: '2026-08-19',
       currency: 'EUR',
-      category_id: 'old-category'
+      category_id: 'old-category',
+      country_code: 'DK',
+      country_name: 'Denmark'
     } as any;
 
     component.startEdit(item);
     component.onEditMerchantChange('New merchant');
+    component.onEditAddressChange('New street 2');
+    component.onEditCityChange('Copenhagen');
+    component.onEditPostalCodeChange('1702');
     component.onEditAmountChange('15.5');
     component.onEditDateChange('2026-08-20');
     component.onEditCategoryChange('new-category');
+    component.onEditCountryChange('DK');
     await component.saveEdit(item);
 
     expect(receiptService.updateReceipt).toHaveBeenCalledWith('receipt-1', {
       merchant_name: 'New merchant',
+      merchant_address: 'New street 2',
+      merchant_city: 'Copenhagen',
+      merchant_postal_code: '1702',
       total_amount: 15.5,
       receipt_date: '2026-08-20',
       currency: 'EUR',
-      category_id: 'new-category'
+      category_id: 'new-category',
+      country_code: 'DK',
+      country_name: 'Denmark'
     });
   });
 });

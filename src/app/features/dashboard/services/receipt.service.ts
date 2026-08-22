@@ -13,12 +13,17 @@ export type ReceiptUploadInput = {
   totalAmount?: number;
   receiptDate?: string;
   currency?: string;
+  countryCode?: string;
+  countryName?: string;
 };
 
 export type ReceiptHistoryItem = {
   id: string;
   image_url: string;
   merchant_name: string | null;
+  merchant_address: string | null;
+  merchant_city: string | null;
+  merchant_postal_code: string | null;
   receipt_date: string | null;
   total_amount: number | null;
   currency: string;
@@ -27,6 +32,8 @@ export type ReceiptHistoryItem = {
   category_id: string | null;
   category_name: string | null;
   category_color: string | null;
+  country_code: string | null;
+  country_name: string | null;
   total_count: number;
   signed_image_url?: string;
 };
@@ -39,6 +46,7 @@ export type ReceiptHistoryQuery = {
   startDate?: string;
   endDate?: string;
   categoryId?: string;
+  countryCode?: string;
 };
 
 export type DashboardSummary = {
@@ -72,17 +80,69 @@ export type AnalyticsMonthPoint = {
   total_amount: number;
 };
 
+export type AnalyticsCountryPoint = {
+  country_code: string;
+  country_name: string;
+  total_amount: number;
+};
+
 export type SpendingAnalytics = {
   category_breakdown: AnalyticsCategoryPoint[];
+  country_breakdown: AnalyticsCountryPoint[];
   monthly_comparison: AnalyticsMonthPoint[];
 };
 
 export type FilteredAnalyticsQuery = {
   merchant?: string;
   categoryId?: string;
+  countryCode?: string;
   startDate?: string;
   endDate?: string;
 };
+
+export type ExpenseCountry = {
+  code: string;
+  name: string;
+};
+
+export const SUPPORTED_COUNTRIES: ExpenseCountry[] = [
+  { code: 'AE', name: 'United Arab Emirates' },
+  { code: 'AT', name: 'Austria' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'BE', name: 'Belgium' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'CH', name: 'Switzerland' },
+  { code: 'CN', name: 'China' },
+  { code: 'CZ', name: 'Czechia' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'DK', name: 'Denmark' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'FR', name: 'France' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'GR', name: 'Greece' },
+  { code: 'HK', name: 'Hong Kong' },
+  { code: 'HU', name: 'Hungary' },
+  { code: 'ID', name: 'Indonesia' },
+  { code: 'IE', name: 'Ireland' },
+  { code: 'IN', name: 'India' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'KR', name: 'South Korea' },
+  { code: 'MX', name: 'Mexico' },
+  { code: 'MY', name: 'Malaysia' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'NO', name: 'Norway' },
+  { code: 'PL', name: 'Poland' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'RO', name: 'Romania' },
+  { code: 'SA', name: 'Saudi Arabia' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'TH', name: 'Thailand' },
+  { code: 'TR', name: 'Turkey' },
+  { code: 'US', name: 'United States' },
+  { code: 'VN', name: 'Vietnam' }
+];
 
 export type FilteredAnalyticsMonth = {
   month_label: string;
@@ -156,6 +216,25 @@ export class ReceiptService {
     return data as ExpenseCategory[];
   }
 
+  async getCountries(): Promise<ExpenseCountry[]> {
+    const { data } = await this.supabaseService.client
+      .from('receipts')
+      .select('country_code, country_name')
+      .not('country_code', 'is', null)
+      .order('country_name');
+
+    const countries = new Map(SUPPORTED_COUNTRIES.map((country) => [country.code, country]));
+    for (const row of data ?? []) {
+      const code = typeof row.country_code === 'string' ? row.country_code : '';
+      const name = typeof row.country_name === 'string' ? row.country_name : '';
+      if (code && name) {
+        countries.set(code, { code, name });
+      }
+    }
+
+    return Array.from(countries.values()).sort((left, right) => left.name.localeCompare(right.name));
+  }
+
   async getSpendingAnalytics(monthsBack = 7): Promise<SpendingAnalytics> {
     const { data, error } = await this.supabaseService.client.rpc('get_spending_analytics', {
       months_back: monthsBack,
@@ -163,12 +242,16 @@ export class ReceiptService {
     });
 
     if (error || !data) {
-      return { category_breakdown: [], monthly_comparison: [] };
+      return { category_breakdown: [], country_breakdown: [], monthly_comparison: [] };
     }
 
     const result = data as Partial<SpendingAnalytics>;
     return {
       category_breakdown: (result.category_breakdown ?? []).map((item) => ({
+        ...item,
+        total_amount: Number(item.total_amount ?? 0)
+      })),
+      country_breakdown: (result.country_breakdown ?? []).map((item) => ({
         ...item,
         total_amount: Number(item.total_amount ?? 0)
       })),
@@ -183,6 +266,7 @@ export class ReceiptService {
     const { data, error } = await this.supabaseService.client.rpc('get_filtered_analytics', {
       p_merchant: query.merchant?.trim() ? query.merchant.trim() : null,
       p_category_id: query.categoryId || null,
+      p_country_code: query.countryCode || null,
       p_start_date: query.startDate ?? null,
       p_end_date: query.endDate ?? null,
       p_target_currency: this.targetCurrency
@@ -260,6 +344,7 @@ export class ReceiptService {
       p_start_date: query.startDate ?? null,
       p_end_date: query.endDate ?? null,
       p_category_id: query.categoryId || null,
+      p_country_code: query.countryCode || null,
       p_target_currency: this.targetCurrency
     });
 
@@ -324,12 +409,17 @@ export class ReceiptService {
       user_id: user.id,
       image_url: filePath,
       merchant_name: input?.merchantName?.trim() || null,
+      merchant_address: null,
+      merchant_city: null,
+      merchant_postal_code: null,
       receipt_date: input?.receiptDate || new Date().toISOString().slice(0, 10),
       total_amount:
         typeof input?.totalAmount === 'number' && Number.isFinite(input.totalAmount)
           ? Number(input.totalAmount)
           : null,
       currency: input?.currency?.trim() || 'EUR',
+      country_code: input?.countryCode?.trim() || null,
+      country_name: input?.countryName?.trim() || null,
       processing_status: 'uploaded',
       created_at: new Date().toISOString()
     };
@@ -357,19 +447,48 @@ export class ReceiptService {
     receiptId: string,
     changes: {
       merchant_name?: string | null;
+      merchant_address?: string | null;
+      merchant_city?: string | null;
+      merchant_postal_code?: string | null;
       total_amount?: number | null;
       receipt_date?: string | null;
       currency?: string | null;
       category_id?: string | null;
+      country_code?: string | null;
+      country_name?: string | null;
     }
   ): Promise<{ success: boolean; message: string }> {
-    const payload = {
-      merchant_name: changes.merchant_name ?? null,
-      total_amount: changes.total_amount ?? null,
-      receipt_date: changes.receipt_date ?? null,
-      currency: changes.currency ?? 'EUR',
-      category_id: changes.category_id ?? null
-    };
+    const payload: Record<string, string | number | null> = {};
+    if ('merchant_name' in changes) {
+      payload['merchant_name'] = changes.merchant_name ?? null;
+    }
+    if ('merchant_address' in changes) {
+      payload['merchant_address'] = changes.merchant_address ?? null;
+    }
+    if ('merchant_city' in changes) {
+      payload['merchant_city'] = changes.merchant_city ?? null;
+    }
+    if ('merchant_postal_code' in changes) {
+      payload['merchant_postal_code'] = changes.merchant_postal_code ?? null;
+    }
+    if ('total_amount' in changes) {
+      payload['total_amount'] = changes.total_amount ?? null;
+    }
+    if ('receipt_date' in changes) {
+      payload['receipt_date'] = changes.receipt_date ?? null;
+    }
+    if ('currency' in changes) {
+      payload['currency'] = changes.currency ?? 'EUR';
+    }
+    if ('category_id' in changes) {
+      payload['category_id'] = changes.category_id ?? null;
+    }
+    if ('country_code' in changes) {
+      payload['country_code'] = changes.country_code ?? null;
+    }
+    if ('country_name' in changes) {
+      payload['country_name'] = changes.country_name ?? null;
+    }
 
     const { error } = await this.supabaseService.client
       .from('receipts')

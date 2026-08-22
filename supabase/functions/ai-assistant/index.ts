@@ -6,7 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
 
-const SYSTEM_PROMPT_TEMPLATE = (todayIso: string) => `You are a household finance assistant. Today's date is ${todayIso}. Use this date to resolve relative periods like "this month", "last month", "this year", or "last year" into exact start_date/end_date values (YYYY-MM-DD) when calling tools.
+const SYSTEM_PROMPT_TEMPLATE = (todayIso: string, targetCurrency: string) => `You are a household finance assistant. Today's date is ${todayIso}. Use this date to resolve relative periods like "this month", "last month", "this year", or "last year" into exact start_date/end_date values (YYYY-MM-DD) when calling tools.
+All tool amounts are converted to the user's default currency (${targetCurrency}). Tool results include display fields such as total_amount_display; use those display fields for money in your final answer. Every monetary amount in your final answer must include the currency code ${targetCurrency}, for example "91.60 ${targetCurrency}". Do not write bare numbers for money. Only mention original receipt currencies if the user explicitly asks about original receipt currencies.
 Answer using only the data returned by your tools.
 Never fabricate numbers, never guess, and never expose database or SQL details.
 Be concise and analytical. Use percentages and trends where relevant. Offer one practical recommendation when appropriate.
@@ -30,7 +31,7 @@ const TOOLS = [
     type: "function",
     function: {
       name: "get_filtered_spending",
-      description: "Get total amount spent and receipt count filtered by merchant name, category name, and/or a date range.",
+      description: "Get total amount spent and receipt count filtered by merchant name, category name, country, and/or a date range.",
       parameters: {
         type: "object",
         properties: {
@@ -39,6 +40,7 @@ const TOOLS = [
             type: "string",
             description: "Category name, e.g. Groceries, Restaurant, Transport, Utilities, Healthcare, Clothing, Entertainment, Travel, Education, Subscriptions, Other"
           },
+          country: { type: "string", description: "Country name or ISO code, e.g. Denmark, DK, Germany, DE, South Korea, KR, Thailand, TH, United States, US" },
           start_date: { type: "string", description: "YYYY-MM-DD" },
           end_date: { type: "string", description: "YYYY-MM-DD" }
         }
@@ -67,6 +69,44 @@ const TOOLS = [
     }
   }
 ];
+
+const SUPPORTED_DEFAULT_CURRENCIES = [
+  "EUR",
+  "USD",
+  "CAD",
+  "MXN",
+  "BRL",
+  "ARS",
+  "CLP",
+  "COP",
+  "PEN",
+  "GBP",
+  "CHF",
+  "DKK",
+  "SEK",
+  "NOK",
+  "PLN",
+  "CZK",
+  "HUF",
+  "RON",
+  "BGN",
+  "TRY",
+  "ISK",
+  "JPY",
+  "CNY",
+  "HKD",
+  "SGD",
+  "INR",
+  "KRW",
+  "THB",
+  "IDR",
+  "MYR",
+  "PHP",
+  "VND",
+  "AED",
+  "SAR",
+  "ILS"
+] as const;
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
@@ -131,7 +171,8 @@ Deno.serve(async (request) => {
   const conversationMessages = (history ?? []).map((row) => ({ role: row.role, content: row.content }));
 
   try {
-    const reply = await runAssistant(openAiKey, supabase, conversationMessages);
+    const targetCurrency = normalizeDefaultCurrency(userData.user.user_metadata?.default_currency);
+    const reply = await runAssistant(openAiKey, supabase, conversationMessages, targetCurrency);
 
     await supabase.from("ai_messages").insert({
       conversation_id: activeConversationId,
@@ -148,10 +189,11 @@ Deno.serve(async (request) => {
 async function runAssistant(
   openAiKey: string,
   supabase: ReturnType<typeof createClient>,
-  conversationMessages: { role: string; content: string }[]
+  conversationMessages: { role: string; content: string }[],
+  targetCurrency: string
 ): Promise<string> {
   const messages: Record<string, unknown>[] = [
-    { role: "system", content: SYSTEM_PROMPT_TEMPLATE(new Date().toISOString().slice(0, 10)) },
+    { role: "system", content: SYSTEM_PROMPT_TEMPLATE(new Date().toISOString().slice(0, 10), targetCurrency) },
     ...conversationMessages
   ];
 
@@ -168,7 +210,7 @@ async function runAssistant(
 
     for (const toolCall of toolCalls) {
       const args = safeParseJson(toolCall.function.arguments);
-      const result = await executeTool(supabase, toolCall.function.name, args);
+      const result = await executeTool(supabase, toolCall.function.name, args, targetCurrency);
       messages.push({
         role: "tool",
         tool_call_id: toolCall.id,
@@ -207,14 +249,16 @@ async function callOpenAi(openAiKey: string, messages: unknown[], allowTools: bo
 async function executeTool(
   supabase: ReturnType<typeof createClient>,
   name: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
+  targetCurrency: string
 ): Promise<unknown> {
   switch (name) {
     case "get_category_breakdown": {
       const { data, error } = await supabase.rpc("get_spending_analytics", {
-        months_back: clampNumber(args.months_back, 7, 1, 24)
+        months_back: clampNumber(args.months_back, 7, 1, 24),
+        p_target_currency: targetCurrency
       });
-      return error ? { error: error.message } : data;
+      return error ? { error: error.message } : withCurrency(data, targetCurrency);
     }
     case "get_filtered_spending": {
       let categoryId: string | null = null;
@@ -227,24 +271,34 @@ async function executeTool(
         categoryId = category?.id ?? null;
       }
 
+      const countryCode = typeof args.country === "string" && args.country.trim()
+        ? normalizeCountryCode(args.country.trim())
+        : null;
+
       const { data, error } = await supabase.rpc("get_filtered_analytics", {
         p_merchant: typeof args.merchant === "string" && args.merchant.trim() ? args.merchant.trim() : null,
         p_category_id: categoryId,
+        p_country_code: countryCode,
         p_start_date: typeof args.start_date === "string" ? args.start_date : null,
-        p_end_date: typeof args.end_date === "string" ? args.end_date : null
+        p_end_date: typeof args.end_date === "string" ? args.end_date : null,
+        p_target_currency: targetCurrency
       });
-      return error ? { error: error.message } : data;
+      return error ? { error: error.message } : withCurrency(data, targetCurrency);
     }
     case "get_recent_receipts": {
       const { data, error } = await supabase.rpc("get_receipt_history", {
         p_page: 1,
-        p_page_size: clampNumber(args.limit, 10, 1, 25)
+        p_page_size: clampNumber(args.limit, 10, 1, 25),
+        p_country_code: null,
+        p_target_currency: targetCurrency
       });
-      return error ? { error: error.message } : data;
+      return error ? { error: error.message } : withCurrency(data, targetCurrency);
     }
     case "get_dashboard_summary": {
-      const { data, error } = await supabase.rpc("get_dashboard_summary");
-      return error ? { error: error.message } : data;
+      const { data, error } = await supabase.rpc("get_dashboard_summary", {
+        p_target_currency: targetCurrency
+      });
+      return error ? { error: error.message } : withCurrency(data, targetCurrency);
     }
     default:
       return { error: `Unknown tool: ${name}` };
@@ -265,4 +319,128 @@ function safeParseJson(value: string): Record<string, unknown> {
   } catch {
     return {};
   }
+}
+
+function withCurrency<T>(data: T, currency: string): T {
+  return addMoneyDisplays(data, currency) as T;
+}
+
+function addMoneyDisplays(value: unknown, currency: string): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => addMoneyDisplays(item, currency));
+  }
+
+  if (!value || typeof value !== "object") {
+    return value;
+  }
+
+  const result: Record<string, unknown> = { currency };
+  for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+    result[key] = addMoneyDisplays(item, currency);
+    if (isMoneyKey(key)) {
+      const amount = Number(item);
+      if (Number.isFinite(amount)) {
+        result[`${key}_display`] = `${amount.toFixed(2)} ${currency}`;
+      }
+    }
+  }
+
+  return result;
+}
+
+function isMoneyKey(key: string): boolean {
+  return [
+    "total_amount",
+    "monthly_spend",
+    "annual_spend",
+    "average_daily_spend",
+    "amount"
+  ].includes(key);
+}
+
+function normalizeDefaultCurrency(value: unknown): string {
+  return typeof value === "string" && SUPPORTED_DEFAULT_CURRENCIES.includes(value as typeof SUPPORTED_DEFAULT_CURRENCIES[number])
+    ? value
+    : "EUR";
+}
+
+function normalizeCountryCode(value: string): string | null {
+  const normalized = value.trim().toLowerCase();
+  const countries: Record<string, string> = {
+    at: "AT",
+    austria: "AT",
+    be: "BE",
+    belgium: "BE",
+    ca: "CA",
+    canada: "CA",
+    ch: "CH",
+    switzerland: "CH",
+    cn: "CN",
+    china: "CN",
+    au: "AU",
+    australia: "AU",
+    cz: "CZ",
+    czechia: "CZ",
+    czech: "CZ",
+    de: "DE",
+    germany: "DE",
+    deutschland: "DE",
+    dk: "DK",
+    denmark: "DK",
+    danmark: "DK",
+    es: "ES",
+    spain: "ES",
+    fr: "FR",
+    france: "FR",
+    gb: "GB",
+    uk: "GB",
+    "united kingdom": "GB",
+    gr: "GR",
+    greece: "GR",
+    hk: "HK",
+    "hong kong": "HK",
+    hu: "HU",
+    hungary: "HU",
+    id: "ID",
+    indonesia: "ID",
+    ie: "IE",
+    ireland: "IE",
+    in: "IN",
+    india: "IN",
+    it: "IT",
+    italy: "IT",
+    jp: "JP",
+    japan: "JP",
+    kr: "KR",
+    korea: "KR",
+    "south korea": "KR",
+    nl: "NL",
+    netherlands: "NL",
+    no: "NO",
+    norway: "NO",
+    pl: "PL",
+    poland: "PL",
+    pt: "PT",
+    portugal: "PT",
+    ro: "RO",
+    romania: "RO",
+    sa: "SA",
+    "saudi arabia": "SA",
+    se: "SE",
+    sweden: "SE",
+    sg: "SG",
+    singapore: "SG",
+    th: "TH",
+    thailand: "TH",
+    tr: "TR",
+    turkey: "TR",
+    turkiye: "TR",
+    us: "US",
+    usa: "US",
+    "united states": "US",
+    vn: "VN",
+    vietnam: "VN"
+  };
+
+  return countries[normalized] ?? null;
 }

@@ -76,10 +76,18 @@ describe('ReceiptService', () => {
 
     const result = await service.updateReceipt('id-1', {
       merchant_name: 'Store',
-      category_id: 'category-1'
+      merchant_city: 'Copenhagen',
+      category_id: 'category-1',
+      country_code: 'DK',
+      country_name: 'Denmark'
     });
 
     expect(result.success).toBeTrue();
-    expect(updateSpy).toHaveBeenCalledWith(jasmine.objectContaining({ category_id: 'category-1' }));
+    expect(updateSpy).toHaveBeenCalledWith(jasmine.objectContaining({
+      merchant_city: 'Copenhagen',
+      category_id: 'category-1',
+      country_code: 'DK',
+      country_name: 'Denmark'
+    }));
   });
 });

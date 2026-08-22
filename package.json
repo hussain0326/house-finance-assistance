@@ -6,9 +6,14 @@
   },
   "scripts": {
     "ng": "ng",
+    "env:generate": "node scripts/write-env.mjs",
+    "prestart": "npm run env:generate",
     "start": "ng serve",
+    "prebuild": "npm run env:generate",
     "build": "ng build",
+    "prewatch": "npm run env:generate",
     "watch": "ng build --watch --configuration development",
+    "pretest": "npm run env:generate",
     "test": "ng test"
   },
   "prettier": {

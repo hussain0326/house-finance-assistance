@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { ExpenseCategory, ReceiptHistoryItem, ReceiptService } from '../../services/receipt.service';
+import { ExpenseCategory, ExpenseCountry, ReceiptHistoryItem, ReceiptService } from '../../services/receipt.service';
 
 const MONTHS = [
   { value: 0, label: 'January' },
@@ -54,15 +54,20 @@ export class ReceiptHistoryPageComponent {
   readonly items = signal<ReceiptHistoryItem[]>([]);
   readonly feedback = signal('');
   readonly categories = signal<ExpenseCategory[]>([]);
+  readonly countries = signal<ExpenseCountry[]>([]);
 
   readonly months = MONTHS;
   readonly years = this.buildYearOptions();
 
   readonly editingId = signal<string | null>(null);
   readonly editMerchant = signal('');
+  readonly editAddress = signal('');
+  readonly editCity = signal('');
+  readonly editPostalCode = signal('');
   readonly editAmount = signal<number | null>(null);
   readonly editDate = signal('');
   readonly editCategoryId = signal<string | null>(null);
+  readonly editCountryCode = signal<string | null>(null);
   readonly failedPreviewIds = signal<Set<string>>(new Set());
 
   readonly selectedIds = signal<Set<string>>(new Set());
@@ -83,6 +88,7 @@ export class ReceiptHistoryPageComponent {
 
     void this.loadPage();
     void this.loadCategories();
+    void this.loadCountries();
   }
 
   async applyFilters(): Promise<void> {
@@ -123,26 +129,39 @@ export class ReceiptHistoryPageComponent {
   startEdit(item: ReceiptHistoryItem): void {
     this.editingId.set(item.id);
     this.editMerchant.set(item.merchant_name ?? '');
+    this.editAddress.set(item.merchant_address ?? '');
+    this.editCity.set(item.merchant_city ?? '');
+    this.editPostalCode.set(item.merchant_postal_code ?? '');
     this.editAmount.set(item.total_amount ?? null);
     this.editDate.set(item.receipt_date ?? '');
     this.editCategoryId.set(item.category_id);
+    this.editCountryCode.set(item.country_code);
   }
 
   cancelEdit(): void {
     this.editingId.set(null);
     this.editMerchant.set('');
+    this.editAddress.set('');
+    this.editCity.set('');
+    this.editPostalCode.set('');
     this.editAmount.set(null);
     this.editDate.set('');
     this.editCategoryId.set(null);
+    this.editCountryCode.set(null);
   }
 
   async saveEdit(item: ReceiptHistoryItem): Promise<void> {
     const result = await this.receiptService.updateReceipt(item.id, {
       merchant_name: this.editMerchant().trim() || null,
+      merchant_address: this.editAddress().trim() || null,
+      merchant_city: this.editCity().trim() || null,
+      merchant_postal_code: this.editPostalCode().trim() || null,
       total_amount: this.editAmount() ?? null,
       receipt_date: this.editDate() || null,
       currency: item.currency,
-      category_id: this.editCategoryId()
+      category_id: this.editCategoryId(),
+      country_code: this.editCountryCode(),
+      country_name: this.countryNameForCode(this.editCountryCode())
     });
 
     if (!result.success) {
@@ -158,6 +177,18 @@ export class ReceiptHistoryPageComponent {
     this.editMerchant.set(value);
   }
 
+  onEditAddressChange(value: string): void {
+    this.editAddress.set(value);
+  }
+
+  onEditCityChange(value: string): void {
+    this.editCity.set(value);
+  }
+
+  onEditPostalCodeChange(value: string): void {
+    this.editPostalCode.set(value);
+  }
+
   onEditAmountChange(value: string): void {
     const parsed = Number(value);
     this.editAmount.set(Number.isFinite(parsed) ? parsed : null);
@@ -169,6 +200,10 @@ export class ReceiptHistoryPageComponent {
 
   onEditCategoryChange(value: string): void {
     this.editCategoryId.set(value || null);
+  }
+
+  onEditCountryChange(value: string): void {
+    this.editCountryCode.set(value || null);
   }
 
   isSelected(item: ReceiptHistoryItem): boolean {
@@ -228,6 +263,14 @@ export class ReceiptHistoryPageComponent {
 
   private async loadCategories(): Promise<void> {
     this.categories.set(await this.receiptService.getCategories());
+  }
+
+  private async loadCountries(): Promise<void> {
+    this.countries.set(await this.receiptService.getCountries());
+  }
+
+  private countryNameForCode(code: string | null): string | null {
+    return this.countries().find((country) => country.code === code)?.name ?? null;
   }
 
   private buildYearOptions(): number[] {

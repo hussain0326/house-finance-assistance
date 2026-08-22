@@ -8,10 +8,15 @@ const corsHeaders = {
 
 type ExtractedReceipt = {
   merchant: string | null;
+  merchantAddress: string | null;
+  merchantCity: string | null;
+  merchantPostalCode: string | null;
   date: string | null;
   currency: string | null;
   totalAmount: number | null;
   category: string | null;
+  countryCode: string | null;
+  countryName: string | null;
 };
 
 type CurrencyConversion = {
@@ -102,7 +107,85 @@ const KNOWN_CATEGORIES = [
   'Other'
 ];
 
-const RECEIPT_EXTRACTION_PROMPT = `Extract receipt data. Return only JSON with merchant, date (YYYY-MM-DD or null), currency (ISO code printed on the receipt or null), totalAmount (number in the printed receipt currency or null), and category (one of: ${KNOWN_CATEGORIES.join(", ")}, or null if unclear). Use the printed transaction date near the merchant, amount, or payment time; read the full 4-digit year carefully and do not confuse similar digits such as 2 and 6. If multiple dates appear, prefer the receipt transaction date over card terminal/reference numbers. Categorize bookstores and books as Education, trains/metro/taxis/fuel/parking as Transport, supermarkets as Groceries, cafes/restaurants/bakeries as Restaurant, pharmacies/clinics as Healthcare, fashion/shoes as Clothing, hotels/flights as Travel, streaming/software memberships as Subscriptions, and cinemas/concerts/games as Entertainment. Never convert currencies and never guess missing values.`;
+const RECEIPT_EXTRACTION_PROMPT = `Extract receipt data. Return only JSON with merchant, merchantAddress, merchantCity, merchantPostalCode, date (YYYY-MM-DD or null), currency (ISO code printed on the receipt or null), totalAmount (number in the printed receipt currency or null), category (one of: ${KNOWN_CATEGORIES.join(", ")}, or null if unclear), countryCode (ISO 3166-1 alpha-2 code or null), and countryName (English country name or null). Use address lines printed under or near the merchant for merchantAddress, merchantCity, and merchantPostalCode. Use the printed transaction date near the merchant, amount, or payment time; read the full 4-digit year carefully and do not confuse similar digits such as 2 and 6. If multiple dates appear, prefer the receipt transaction date over card terminal/reference numbers. Infer country primarily from merchantAddress, merchantCity, postal code, printed language, and then currency: København/Danmark/DKK means DK Denmark, Berlin/Deutschland means DE Germany, Paris/France means FR France, London/UK/GBP means GB United Kingdom. Categorize bookstores and books as Education, trains/metro/taxis/fuel/parking as Transport, supermarkets as Groceries, cafes/restaurants/bakeries as Restaurant, pharmacies/clinics as Healthcare, fashion/shoes as Clothing, hotels/flights as Travel, streaming/software memberships as Subscriptions, and cinemas/concerts/games as Entertainment. Never convert currencies and never guess missing values.`;
+
+const KNOWN_COUNTRIES: Record<string, string> = {
+  AE: 'United Arab Emirates',
+  AT: 'Austria',
+  AU: 'Australia',
+  BE: 'Belgium',
+  CA: 'Canada',
+  CH: 'Switzerland',
+  CN: 'China',
+  CZ: 'Czechia',
+  DE: 'Germany',
+  DK: 'Denmark',
+  ES: 'Spain',
+  FR: 'France',
+  GB: 'United Kingdom',
+  GR: 'Greece',
+  HK: 'Hong Kong',
+  HU: 'Hungary',
+  ID: 'Indonesia',
+  IE: 'Ireland',
+  IN: 'India',
+  IT: 'Italy',
+  JP: 'Japan',
+  KR: 'South Korea',
+  MX: 'Mexico',
+  MY: 'Malaysia',
+  NL: 'Netherlands',
+  NO: 'Norway',
+  PL: 'Poland',
+  PT: 'Portugal',
+  RO: 'Romania',
+  SA: 'Saudi Arabia',
+  SE: 'Sweden',
+  SG: 'Singapore',
+  TH: 'Thailand',
+  TR: 'Turkey',
+  US: 'United States',
+  VN: 'Vietnam'
+};
+
+const COUNTRY_RULES: { code: string; keywords: string[] }[] = [
+  { code: 'DK', keywords: ['københavn', 'kobenhavn', 'copenhagen', 'danmark', 'denmark', 'dkk'] },
+  { code: 'DE', keywords: ['berlin', 'hamburg', 'munich', 'münchen', 'deutschland', 'germany', 'gmbh'] },
+  { code: 'FR', keywords: ['paris', 'france'] },
+  { code: 'GB', keywords: ['london', 'united kingdom', 'great britain', 'gbp'] },
+  { code: 'GR', keywords: ['athens', 'greece', 'hellas'] },
+  { code: 'US', keywords: ['united states', 'usa', 'usd'] },
+  { code: 'CA', keywords: ['canada', 'cad'] },
+  { code: 'AU', keywords: ['australia', 'sydney', 'melbourne', 'aud'] },
+  { code: 'SE', keywords: ['stockholm', 'sweden', 'sverige', 'sek'] },
+  { code: 'NO', keywords: ['oslo', 'norway', 'norge', 'nok'] },
+  { code: 'CH', keywords: ['switzerland', 'schweiz', 'zurich', 'zürich', 'chf'] },
+  { code: 'NL', keywords: ['netherlands', 'amsterdam'] },
+  { code: 'IT', keywords: ['italy', 'roma', 'rome', 'milano'] },
+  { code: 'ES', keywords: ['spain', 'madrid', 'barcelona'] },
+  { code: 'IN', keywords: ['india', 'inr'] },
+  { code: 'JP', keywords: ['japan', 'tokyo', 'jpy'] },
+  { code: 'KR', keywords: ['south korea', 'korea', 'seoul', 'krw'] },
+  { code: 'CN', keywords: ['china', 'beijing', 'shanghai', 'cny'] },
+  { code: 'HK', keywords: ['hong kong', 'hkd'] },
+  { code: 'SG', keywords: ['singapore', 'sgd'] },
+  { code: 'TH', keywords: ['thailand', 'bangkok', 'thai baht', 'thb'] },
+  { code: 'ID', keywords: ['indonesia', 'bali', 'jakarta', 'idr'] },
+  { code: 'MY', keywords: ['malaysia', 'kuala lumpur', 'myr'] },
+  { code: 'VN', keywords: ['vietnam', 'hanoi', 'ho chi minh', 'vnd'] },
+  { code: 'AE', keywords: ['united arab emirates', 'dubai', 'abu dhabi', 'aed'] },
+  { code: 'SA', keywords: ['saudi arabia', 'riyadh', 'jeddah', 'sar'] },
+  { code: 'TR', keywords: ['turkey', 'turkiye', 'istanbul', 'try'] },
+  { code: 'MX', keywords: ['mexico', 'mexico city', 'mxn'] },
+  { code: 'PT', keywords: ['portugal', 'lisbon', 'porto'] },
+  { code: 'IE', keywords: ['ireland', 'dublin'] },
+  { code: 'AT', keywords: ['austria', 'vienna', 'wien'] },
+  { code: 'BE', keywords: ['belgium', 'brussels'] },
+  { code: 'PL', keywords: ['poland', 'warsaw', 'krakow', 'pln'] },
+  { code: 'CZ', keywords: ['czech', 'czechia', 'prague', 'czk'] },
+  { code: 'HU', keywords: ['hungary', 'budapest', 'huf'] },
+  { code: 'RO', keywords: ['romania', 'bucharest', 'ron'] }
+];
 
 const CATEGORY_RULES: { category: string; keywords: string[] }[] = [
   {
@@ -186,7 +269,7 @@ Deno.serve(async (request) => {
 
   const { data: receipt, error: receiptError } = await supabase
     .from("receipts")
-    .select("id, image_url")
+    .select("id, image_url, country_code, country_name")
     .eq("id", receiptId)
     .eq("user_id", userData.user.id)
     .single();
@@ -216,6 +299,10 @@ Deno.serve(async (request) => {
       : await extractReceiptFromImage(openAiKey, fileBase64, fileType);
     const extracted = normalizeExtraction(JSON.parse(content ?? "{}"));
     const resolvedCategory = resolveCategory(extracted);
+    const resolvedCountry = resolveCountry(extracted, {
+      code: typeof receipt.country_code === "string" ? receipt.country_code : null,
+      name: typeof receipt.country_name === "string" ? receipt.country_name : null
+    });
     const defaultCurrency = normalizeDefaultCurrency(userData.user.user_metadata?.default_currency);
     const conversion = await convertCurrency(supabase, extracted.totalAmount, extracted.currency, defaultCurrency);
 
@@ -233,6 +320,9 @@ Deno.serve(async (request) => {
       .from("receipts")
       .update({
         merchant_name: extracted.merchant,
+        merchant_address: extracted.merchantAddress,
+        merchant_city: extracted.merchantCity,
+        merchant_postal_code: extracted.merchantPostalCode,
         receipt_date: extracted.date,
         total_amount: conversion.amount,
         currency: conversion.currency,
@@ -240,6 +330,8 @@ Deno.serve(async (request) => {
         original_currency: conversion.originalCurrency,
         exchange_rate: conversion.exchangeRate,
         category_id: categoryId,
+        country_code: resolvedCountry.code,
+        country_name: resolvedCountry.name,
         processing_status: "processed"
       })
       .eq("id", receiptId)
@@ -254,6 +346,8 @@ Deno.serve(async (request) => {
       receipt: {
         ...extracted,
         category: resolvedCategory,
+        countryCode: resolvedCountry.code,
+        countryName: resolvedCountry.name,
         totalAmount: conversion.amount,
         currency: conversion.currency,
         originalTotalAmount: conversion.originalAmount,
@@ -275,10 +369,15 @@ function normalizeExtraction(value: Partial<ExtractedReceipt>): ExtractedReceipt
   const amount = Number(value.totalAmount);
   return {
     merchant: typeof value.merchant === "string" ? value.merchant.trim() || null : null,
+    merchantAddress: typeof value.merchantAddress === "string" ? value.merchantAddress.trim() || null : null,
+    merchantCity: typeof value.merchantCity === "string" ? value.merchantCity.trim() || null : null,
+    merchantPostalCode: typeof value.merchantPostalCode === "string" ? value.merchantPostalCode.trim() || null : null,
     date: typeof value.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.date) ? value.date : null,
     currency: typeof value.currency === "string" ? value.currency.trim().toUpperCase() || null : null,
     totalAmount: Number.isFinite(amount) && amount >= 0 ? amount : null,
-    category: typeof value.category === "string" && KNOWN_CATEGORIES.includes(value.category) ? value.category : null
+    category: typeof value.category === "string" && KNOWN_CATEGORIES.includes(value.category) ? value.category : null,
+    countryCode: typeof value.countryCode === "string" ? value.countryCode.trim().toUpperCase() || null : null,
+    countryName: typeof value.countryName === "string" ? value.countryName.trim() || null : null
   };
 }
 
@@ -346,12 +445,17 @@ async function extractReceiptFromPdf(openAiKey: string, pdfBase64: string): Prom
             additionalProperties: false,
             properties: {
               merchant: { type: ["string", "null"] },
+              merchantAddress: { type: ["string", "null"] },
+              merchantCity: { type: ["string", "null"] },
+              merchantPostalCode: { type: ["string", "null"] },
               date: { type: ["string", "null"] },
               currency: { type: ["string", "null"] },
               totalAmount: { type: ["number", "null"] },
-              category: { type: ["string", "null"], enum: [...KNOWN_CATEGORIES, null] }
+              category: { type: ["string", "null"], enum: [...KNOWN_CATEGORIES, null] },
+              countryCode: { type: ["string", "null"] },
+              countryName: { type: ["string", "null"] }
             },
-            required: ["merchant", "date", "currency", "totalAmount", "category"]
+            required: ["merchant", "merchantAddress", "merchantCity", "merchantPostalCode", "date", "currency", "totalAmount", "category", "countryCode", "countryName"]
           }
         }
       }
@@ -437,6 +541,44 @@ function resolveCategory(receipt: ExtractedReceipt): string | null {
   }
 
   return receipt.category;
+}
+
+function resolveCountry(
+  receipt: ExtractedReceipt,
+  uploadHint: { code: string | null; name: string | null }
+): { code: string | null; name: string | null } {
+  const hintedCode = normalizeCountryCode(uploadHint.code);
+  if (hintedCode) {
+    return { code: hintedCode, name: KNOWN_COUNTRIES[hintedCode] ?? uploadHint.name ?? hintedCode };
+  }
+
+  const candidates = [
+    receipt.countryCode,
+    receipt.countryName,
+    receipt.merchant,
+    receipt.merchantAddress,
+    receipt.merchantCity,
+    receipt.merchantPostalCode,
+    receipt.currency
+  ]
+    .map((value) => normalizeSearchText(value))
+    .join(' ');
+
+  const matchedRule = COUNTRY_RULES.find((rule) =>
+    rule.keywords.some((keyword) => candidates.includes(normalizeSearchText(keyword)))
+  );
+  const code = matchedRule?.code ?? normalizeCountryCode(receipt.countryCode);
+
+  if (!code) {
+    return { code: null, name: null };
+  }
+
+  return { code, name: KNOWN_COUNTRIES[code] ?? receipt.countryName ?? code };
+}
+
+function normalizeCountryCode(value: string | null): string | null {
+  const normalized = value?.trim().toUpperCase() ?? '';
+  return KNOWN_COUNTRIES[normalized] ? normalized : null;
 }
 
 function normalizeSearchText(value: string | null): string {

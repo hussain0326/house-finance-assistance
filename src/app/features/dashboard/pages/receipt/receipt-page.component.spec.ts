@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { ReceiptPageComponent } from './receipt-page.component';
 import { ReceiptService } from '../../services/receipt.service';
 
@@ -20,7 +21,7 @@ describe('ReceiptPageComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [ReceiptPageComponent],
-      providers: [{ provide: ReceiptService, useValue: receiptService }]
+      providers: [provideRouter([]), { provide: ReceiptService, useValue: receiptService }]
     }).compileComponents();
   });
 
@@ -38,4 +39,16 @@ describe('ReceiptPageComponent', () => {
 
     expect(component.selectedFile()).toBeNull();
   });
+
+  it('should show review guidance after successful processing', async () => {
+    const fixture = TestBed.createComponent(ReceiptPageComponent);
+    const component = fixture.componentInstance;
+    component.selectedFile.set(new File(['receipt'], 'receipt.png', { type: 'image/png' }));
+
+    await component.uploadSelected();
+
+    expect(component.ocrStatus()).toBe('complete');
+    expect(component.reviewMessage()).toContain('Receipt History');
+  });
+
 });

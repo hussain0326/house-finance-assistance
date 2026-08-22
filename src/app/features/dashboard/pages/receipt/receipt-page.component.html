@@ -71,4 +71,20 @@
   @if (ocrStatus() === 'processing') {
     <p class="mt-2 text-sm text-slate-600" aria-live="polite">OCR status: processing</p>
   }
+
+  @if (ocrStatus() === 'complete') {
+    <div class="review-card" aria-live="polite">
+      <div class="review-icon">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div>
+        <p class="review-title">Receipt processed</p>
+        <p class="review-copy">{{ reviewMessage() }}</p>
+        <a mat-stroked-button color="primary" routerLink="/app/history" class="review-action">
+          <mat-icon>history</mat-icon>
+          Review in Receipt History
+        </a>
+      </div>
+    </div>
+  }
 </mat-card>
