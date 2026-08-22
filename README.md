@@ -169,6 +169,8 @@ SUPABASE_ANON_KEY=your Supabase publishable key
 APP_URL=https://hussain-home-finance-assistance.vercel.app
 ```
 
+The build script also accepts common aliases such as `PUBLIC_SUPABASE_URL`, `VITE_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `VERCEL_PROJECT_PRODUCTION_URL`.
+
 The generated Angular files are ignored by Git:
 
 ```text

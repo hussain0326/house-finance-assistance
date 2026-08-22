@@ -5,9 +5,28 @@ import { fileURLToPath } from 'node:url';
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 loadLocalEnv(resolve(rootDir, '.env.local'));
 
-const supabaseUrl = readRequiredEnv('SUPABASE_URL');
-const supabaseAnonKey = readRequiredEnv('SUPABASE_ANON_KEY');
-const appUrl = readOptionalEnv('APP_URL');
+const supabaseUrl = readRequiredEnv('SUPABASE_URL', [
+  'PUBLIC_SUPABASE_URL',
+  'VITE_SUPABASE_URL',
+  'NG_APP_SUPABASE_URL',
+  'NEXT_PUBLIC_SUPABASE_URL'
+]);
+const supabaseAnonKey = readRequiredEnv('SUPABASE_ANON_KEY', [
+  'SUPABASE_PUBLISHABLE_KEY',
+  'PUBLIC_SUPABASE_ANON_KEY',
+  'PUBLIC_SUPABASE_PUBLISHABLE_KEY',
+  'VITE_SUPABASE_ANON_KEY',
+  'VITE_SUPABASE_PUBLISHABLE_KEY',
+  'NG_APP_SUPABASE_ANON_KEY',
+  'NEXT_PUBLIC_SUPABASE_ANON_KEY'
+]);
+const appUrl = readOptionalEnv('APP_URL', [
+  'PUBLIC_APP_URL',
+  'VITE_APP_URL',
+  'NG_APP_URL',
+  'NEXT_PUBLIC_APP_URL',
+  'VERCEL_PROJECT_PRODUCTION_URL'
+]);
 
 writeEnvironmentFile('src/environments/environment.generated.ts', false, {
   supabaseUrl,
@@ -44,19 +63,31 @@ function loadLocalEnv(filePath) {
   }
 }
 
-function readRequiredEnv(name) {
-  const value = process.env[name]?.trim();
+function readRequiredEnv(name, aliases = []) {
+  const value = readOptionalEnv(name, aliases);
   if (!value) {
+    const supportedNames = [name, ...aliases].join(', ');
     throw new Error(
       `Missing required environment variable: ${name}. ` +
-      `Create .env.local from .env.example for local development, or set ${name} in Vercel project environment variables.`
+      `Create .env.local from .env.example for local development, or set one of these in Vercel project environment variables: ${supportedNames}.`
     );
   }
   return value;
 }
 
-function readOptionalEnv(name) {
-  return process.env[name]?.trim() ?? '';
+function readOptionalEnv(name, aliases = []) {
+  for (const candidate of [name, ...aliases]) {
+    const value = process.env[candidate]?.trim();
+    if (value) {
+      return candidate === 'VERCEL_PROJECT_PRODUCTION_URL' ? normalizeVercelUrl(value) : value;
+    }
+  }
+
+  return '';
+}
+
+function normalizeVercelUrl(value) {
+  return value.startsWith('http') ? value : `https://${value}`;
 }
 
 function writeEnvironmentFile(relativePath, production, values) {
