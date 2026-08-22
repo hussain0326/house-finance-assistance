@@ -84,25 +84,45 @@
             [attr.aria-label]="'Select receipt from ' + (item.merchant_name || 'unknown merchant')"
           ></mat-checkbox>
 
-          <a [href]="item.signed_image_url" target="_blank" rel="noopener" class="block overflow-hidden rounded-lg border border-slate-200">
-            <img
-              class="h-24 w-24 object-cover"
-              [src]="item.signed_image_url"
-              alt="Receipt preview"
-            />
+          <a
+            [href]="item.signed_image_url"
+            target="_blank"
+            rel="noopener"
+            class="receipt-preview"
+            [class.receipt-preview--pdf]="isPdfReceipt(item)"
+            [class.receipt-preview--image-missing]="!isPdfReceipt(item) && isImagePreviewUnavailable(item)"
+            [attr.aria-label]="isPdfReceipt(item) ? 'Open PDF receipt' : 'Open receipt image'"
+          >
+            @if (isPdfReceipt(item)) {
+              <mat-icon>picture_as_pdf</mat-icon>
+              <span>PDF</span>
+            } @else if (isImagePreviewUnavailable(item)) {
+              <mat-icon>receipt_long</mat-icon>
+              <span>IMAGE</span>
+            } @else {
+              <img
+                class="receipt-preview__image"
+                [src]="item.signed_image_url"
+                alt="Receipt preview"
+                (error)="markPreviewFailed(item)"
+              />
+              <span class="receipt-preview__open">
+                <mat-icon>open_in_new</mat-icon>
+              </span>
+            }
           </a>
 
           <div>
             @if (editingId() === item.id) {
-              <div class="flex flex-wrap items-center gap-2">
+              <div class="edit-grid">
                 <input
-                  class="rounded border border-slate-300 px-2 py-1 text-sm"
+                  class="edit-input"
                   [value]="editMerchant()"
                   (input)="onEditMerchantChange($any($event.target).value)"
                   aria-label="Edit merchant name"
                 />
                 <input
-                  class="w-28 rounded border border-slate-300 px-2 py-1 text-sm"
+                  class="edit-input"
                   [value]="editAmount() ?? ''"
                   (input)="onEditAmountChange($any($event.target).value)"
                   type="number"
@@ -110,8 +130,28 @@
                   step="0.01"
                   aria-label="Edit total amount"
                 />
-                <button mat-stroked-button color="primary" type="button" (click)="saveEdit(item)">Save</button>
-                <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+                <input
+                  class="edit-input"
+                  [value]="editDate()"
+                  (input)="onEditDateChange($any($event.target).value)"
+                  type="date"
+                  aria-label="Edit receipt date"
+                />
+                <select
+                  class="edit-input"
+                  [value]="editCategoryId() ?? ''"
+                  (change)="onEditCategoryChange($any($event.target).value)"
+                  aria-label="Edit receipt category"
+                >
+                  <option value="">Uncategorized</option>
+                  @for (category of categories(); track category.id) {
+                    <option [value]="category.id">{{ category.name }}</option>
+                  }
+                </select>
+                <div class="edit-actions">
+                  <button mat-stroked-button color="primary" type="button" (click)="saveEdit(item)">Save</button>
+                  <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+                </div>
               </div>
             } @else {
               <p class="m-0 font-semibold">{{ item.merchant_name || 'Unknown Merchant' }}</p>
@@ -125,7 +165,7 @@
             </p>
             <p class="m-0 text-xs text-slate-500">Receipt ID: {{ item.id }}</p>
             @if (editingId() !== item.id) {
-              <button class="mt-2" mat-button type="button" (click)="startEdit(item)">Edit name/amount</button>
+              <button class="mt-2" mat-button type="button" (click)="startEdit(item)">Edit details</button>
             }
           </div>
 

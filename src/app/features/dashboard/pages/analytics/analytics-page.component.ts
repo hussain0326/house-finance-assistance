@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { EChartsCoreOption } from 'echarts/core';
 import { NgxEchartsDirective } from 'ngx-echarts';
+import { AuthService } from '../../../../core/auth/auth.service';
 import {
   ExpenseCategory,
   FilteredAnalyticsMonth,
@@ -52,6 +53,7 @@ export class AnalyticsPageComponent {
   readonly feedback = signal('');
   readonly categoryTotal = signal(0);
   readonly monthlyTotal = signal(0);
+  readonly currencyCode = () => this.authService?.getProfile().defaultCurrency ?? 'EUR';
 
   readonly categories = signal<ExpenseCategory[]>([]);
   readonly months = MONTHS;
@@ -108,7 +110,8 @@ export class AnalyticsPageComponent {
 
   constructor(
     private readonly formBuilder?: FormBuilder,
-    private readonly receiptService?: ReceiptService
+    private readonly receiptService?: ReceiptService,
+    private readonly authService?: AuthService
   ) {
     this.filterForm = (this.formBuilder ?? new FormBuilder()).group({
       merchant: [''],

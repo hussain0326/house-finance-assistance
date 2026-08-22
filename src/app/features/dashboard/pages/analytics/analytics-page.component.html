@@ -8,11 +8,11 @@
   <div class="lg:col-span-2 grid gap-3 sm:grid-cols-2">
     <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
       <p class="m-0 text-sm text-slate-600">Categorized spending</p>
-      <p class="m-0 mt-1 text-2xl font-semibold">{{ categoryTotal() | currency: 'EUR' }}</p>
+      <p class="m-0 mt-1 text-2xl font-semibold">{{ categoryTotal() | currency: currencyCode() }}</p>
     </div>
     <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
       <p class="m-0 text-sm text-slate-600">Latest month</p>
-      <p class="m-0 mt-1 text-2xl font-semibold">{{ monthlyTotal() | currency: 'EUR' }}</p>
+      <p class="m-0 mt-1 text-2xl font-semibold">{{ monthlyTotal() | currency: currencyCode() }}</p>
     </div>
   </div>
 
@@ -21,7 +21,7 @@
       <mat-icon>pie_chart</mat-icon>
       <div>
         <h2 class="m-0 text-xl font-semibold">Category Breakdown</h2>
-        <p class="mt-1 text-slate-600">This month spending split by category.</p>
+        <p class="mt-1 text-slate-600">All categorized receipt spending by category.</p>
       </div>
     </div>
     <div
@@ -103,7 +103,7 @@
       <div class="mt-4 grid gap-3 sm:grid-cols-2">
         <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
           <p class="m-0 text-sm text-slate-600">Total spent</p>
-          <p class="m-0 mt-1 text-2xl font-semibold">{{ filterTotal() | currency: 'EUR' }}</p>
+          <p class="m-0 mt-1 text-2xl font-semibold">{{ filterTotal() | currency: currencyCode() }}</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
           <p class="m-0 text-sm text-slate-600">Matching receipts</p>
@@ -120,7 +120,7 @@
           @for (month of filterBreakdown(); track month.month_date) {
             <div class="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm">
               <span>{{ month.month_label }}</span>
-              <span class="font-semibold">{{ month.total_amount | currency: 'EUR' }}</span>
+              <span class="font-semibold">{{ month.total_amount | currency: currencyCode() }}</span>
             </div>
           }
         </div>

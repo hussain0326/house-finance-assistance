@@ -7,7 +7,8 @@ describe('SettingsPageComponent', () => {
     getProfile: jasmine.createSpy('getProfile').and.returnValue({
       firstName: 'Alex',
       lastName: 'Morgan',
-      email: 'alex@example.com'
+      email: 'alex@example.com',
+      defaultCurrency: 'EUR'
     }),
     updateProfile: jasmine.createSpy('updateProfile').and.resolveTo({ error: null }),
     updatePassword: jasmine.createSpy('updatePassword').and.resolveTo({ error: null })

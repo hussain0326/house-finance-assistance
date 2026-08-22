@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 type UploadResult = {
   success: boolean;
@@ -101,10 +102,15 @@ export type FilteredAnalyticsResult = {
 export class ReceiptService {
   private readonly bucketName = 'receipt-images';
 
-  constructor(private readonly supabaseService: SupabaseService) {}
+  constructor(
+    private readonly supabaseService: SupabaseService,
+    private readonly authService?: AuthService
+  ) {}
 
   async getDashboardSummary(): Promise<DashboardSummary> {
-    const { data, error } = await this.supabaseService.client.rpc('get_dashboard_summary');
+    const { data, error } = await this.supabaseService.client.rpc('get_dashboard_summary', {
+      p_target_currency: this.targetCurrency
+    });
     if (error || !data || data.length === 0) {
       return {
         monthly_spend: 0,
@@ -123,7 +129,8 @@ export class ReceiptService {
 
   async getDashboardTrend(monthsBack = 7): Promise<DashboardTrendPoint[]> {
     const { data, error } = await this.supabaseService.client.rpc('get_dashboard_trend', {
-      months_back: monthsBack
+      months_back: monthsBack,
+      p_target_currency: this.targetCurrency
     });
 
     if (error || !data) {
@@ -151,7 +158,8 @@ export class ReceiptService {
 
   async getSpendingAnalytics(monthsBack = 7): Promise<SpendingAnalytics> {
     const { data, error } = await this.supabaseService.client.rpc('get_spending_analytics', {
-      months_back: monthsBack
+      months_back: monthsBack,
+      p_target_currency: this.targetCurrency
     });
 
     if (error || !data) {
@@ -176,7 +184,8 @@ export class ReceiptService {
       p_merchant: query.merchant?.trim() ? query.merchant.trim() : null,
       p_category_id: query.categoryId || null,
       p_start_date: query.startDate ?? null,
-      p_end_date: query.endDate ?? null
+      p_end_date: query.endDate ?? null,
+      p_target_currency: this.targetCurrency
     });
 
     if (error || !data) {
@@ -250,7 +259,8 @@ export class ReceiptService {
       p_status: query.status?.trim() ? query.status.trim() : null,
       p_start_date: query.startDate ?? null,
       p_end_date: query.endDate ?? null,
-      p_category_id: query.categoryId || null
+      p_category_id: query.categoryId || null,
+      p_target_currency: this.targetCurrency
     });
 
     if (error || !data) {
@@ -350,13 +360,15 @@ export class ReceiptService {
       total_amount?: number | null;
       receipt_date?: string | null;
       currency?: string | null;
+      category_id?: string | null;
     }
   ): Promise<{ success: boolean; message: string }> {
     const payload = {
       merchant_name: changes.merchant_name ?? null,
       total_amount: changes.total_amount ?? null,
       receipt_date: changes.receipt_date ?? null,
-      currency: changes.currency ?? 'EUR'
+      currency: changes.currency ?? 'EUR',
+      category_id: changes.category_id ?? null
     };
 
     const { error } = await this.supabaseService.client
@@ -411,6 +423,10 @@ export class ReceiptService {
       return 'jpg';
     }
     return value;
+  }
+
+  private get targetCurrency(): string {
+    return this.authService?.getProfile().defaultCurrency ?? 'EUR';
   }
 
   private mapStorageError(message: string): string {

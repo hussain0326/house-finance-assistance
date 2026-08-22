@@ -29,6 +29,7 @@ export class DashboardPageComponent {
   readonly recentExpenses = signal<Expense[]>([]);
 
   readonly profile = () => this.authService.getProfile();
+  readonly currencyCode = () => this.profile().defaultCurrency;
 
   readonly trendChartOptions = signal<EChartsCoreOption>({
     tooltip: {

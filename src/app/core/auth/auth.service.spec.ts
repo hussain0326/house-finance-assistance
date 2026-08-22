@@ -54,6 +54,14 @@ describe('AuthService', () => {
     expect(result.needsEmailConfirmation).toBeTrue();
   });
 
+  it('should request password reset with auth callback URL', async () => {
+    await service.requestPasswordReset('a@b.com');
+
+    expect(mockAuth.resetPasswordForEmail).toHaveBeenCalledWith('a@b.com', {
+      redirectTo: `${window.location.origin}/auth`
+    });
+  });
+
   it('should update the password after a recovery link is opened', async () => {
     const result = await service.updatePassword('new-password123');
 

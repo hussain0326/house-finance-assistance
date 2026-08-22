@@ -55,4 +55,32 @@ describe('ReceiptHistoryPageComponent', () => {
 
     expect(receiptService.deleteReceipts).toHaveBeenCalledWith(['receipt-1']);
   });
+
+  it('should save corrected receipt details', async () => {
+    const fixture = TestBed.createComponent(ReceiptHistoryPageComponent);
+    const component = fixture.componentInstance;
+    const item = {
+      id: 'receipt-1',
+      merchant_name: 'Old merchant',
+      total_amount: 12,
+      receipt_date: '2026-08-19',
+      currency: 'EUR',
+      category_id: 'old-category'
+    } as any;
+
+    component.startEdit(item);
+    component.onEditMerchantChange('New merchant');
+    component.onEditAmountChange('15.5');
+    component.onEditDateChange('2026-08-20');
+    component.onEditCategoryChange('new-category');
+    await component.saveEdit(item);
+
+    expect(receiptService.updateReceipt).toHaveBeenCalledWith('receipt-1', {
+      merchant_name: 'New merchant',
+      total_amount: 15.5,
+      receipt_date: '2026-08-20',
+      currency: 'EUR',
+      category_id: 'new-category'
+    });
+  });
 });

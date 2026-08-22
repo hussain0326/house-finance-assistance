@@ -13,7 +13,7 @@
         Monthly Spending
       </mat-card-title>
     </mat-card-header>
-    <mat-card-content class="pt-2 text-3xl font-semibold">{{ monthlySpend() | currency: 'EUR' }}</mat-card-content>
+    <mat-card-content class="pt-2 text-3xl font-semibold">{{ monthlySpend() | currency: currencyCode() }}</mat-card-content>
   </mat-card>
 
   <mat-card class="summary-card elevated-card" appearance="outlined">
@@ -23,7 +23,7 @@
         Annual Spending
       </mat-card-title>
     </mat-card-header>
-    <mat-card-content class="pt-2 text-3xl font-semibold">{{ annualSpend() | currency: 'EUR' }}</mat-card-content>
+    <mat-card-content class="pt-2 text-3xl font-semibold">{{ annualSpend() | currency: currencyCode() }}</mat-card-content>
   </mat-card>
 
   <mat-card class="summary-card elevated-card" appearance="outlined">
@@ -33,7 +33,7 @@
         Average Daily Spend
       </mat-card-title>
     </mat-card-header>
-    <mat-card-content class="pt-2 text-3xl font-semibold">{{ avgSpend() | currency: 'EUR' }}</mat-card-content>
+    <mat-card-content class="pt-2 text-3xl font-semibold">{{ avgSpend() | currency: currencyCode() }}</mat-card-content>
   </mat-card>
 </section>
 
@@ -54,7 +54,7 @@
                 <p class="m-0 font-medium">{{ expense.merchant }}</p>
                 <p class="m-0 text-sm text-slate-600">{{ expense.category }} • {{ expense.date | date }}</p>
               </div>
-              <strong>{{ expense.amount | currency: 'EUR' }}</strong>
+              <strong>{{ expense.amount | currency: currencyCode() }}</strong>
             </div>
           </li>
         }

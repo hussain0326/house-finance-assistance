@@ -7,8 +7,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AuthService, STRONG_PASSWORD_PATTERN } from '../../core/auth/auth.service';
+import { AuthService, STRONG_PASSWORD_PATTERN, SUPPORTED_CURRENCIES } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-auth-page',
@@ -20,6 +21,7 @@ import { AuthService, STRONG_PASSWORD_PATTERN } from '../../core/auth/auth.servi
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatSelectModule,
     MatProgressSpinnerModule
   ],
   templateUrl: './auth-page.component.html',
@@ -68,6 +70,7 @@ export class AuthPageComponent {
           ? 'Sign In'
           : 'Create Account'
   );
+  readonly currencies = SUPPORTED_CURRENCIES;
 
   readonly form;
 
@@ -79,7 +82,8 @@ export class AuthPageComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]],
       firstName: ['', [Validators.maxLength(60)]],
-      lastName: ['', [Validators.maxLength(60)]]
+      lastName: ['', [Validators.maxLength(60)]],
+      defaultCurrency: ['EUR', [Validators.required]]
     });
 
     if (this.isPasswordRecovery()) {
@@ -136,14 +140,14 @@ export class AuthPageComponent {
     this.feedbackSignal.set(null);
     this.isSubmittingSignal.set(true);
 
-    const { email, password, firstName, lastName } = this.form.getRawValue();
+    const { email, password, firstName, lastName, defaultCurrency } = this.form.getRawValue();
     const result = isRecovery
       ? await this.authService.updatePassword(password)
       : isForgotPassword
         ? await this.authService.requestPasswordReset(email)
       : this.isSignInModeSignal()
         ? await this.authService.signIn(email, password)
-        : await this.authService.signUp(email, password, firstName, lastName);
+        : await this.authService.signUp(email, password, firstName, lastName, defaultCurrency);
 
     this.isSubmittingSignal.set(false);
 

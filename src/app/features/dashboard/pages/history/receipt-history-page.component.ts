@@ -61,6 +61,9 @@ export class ReceiptHistoryPageComponent {
   readonly editingId = signal<string | null>(null);
   readonly editMerchant = signal('');
   readonly editAmount = signal<number | null>(null);
+  readonly editDate = signal('');
+  readonly editCategoryId = signal<string | null>(null);
+  readonly failedPreviewIds = signal<Set<string>>(new Set());
 
   readonly selectedIds = signal<Set<string>>(new Set());
   readonly deleting = signal(false);
@@ -103,24 +106,43 @@ export class ReceiptHistoryPageComponent {
     return item.id;
   }
 
+  isPdfReceipt(item: ReceiptHistoryItem): boolean {
+    return item.image_url.toLowerCase().endsWith('.pdf');
+  }
+
+  isImagePreviewUnavailable(item: ReceiptHistoryItem): boolean {
+    return !item.signed_image_url || this.failedPreviewIds().has(item.id);
+  }
+
+  markPreviewFailed(item: ReceiptHistoryItem): void {
+    const next = new Set(this.failedPreviewIds());
+    next.add(item.id);
+    this.failedPreviewIds.set(next);
+  }
+
   startEdit(item: ReceiptHistoryItem): void {
     this.editingId.set(item.id);
     this.editMerchant.set(item.merchant_name ?? '');
     this.editAmount.set(item.total_amount ?? null);
+    this.editDate.set(item.receipt_date ?? '');
+    this.editCategoryId.set(item.category_id);
   }
 
   cancelEdit(): void {
     this.editingId.set(null);
     this.editMerchant.set('');
     this.editAmount.set(null);
+    this.editDate.set('');
+    this.editCategoryId.set(null);
   }
 
   async saveEdit(item: ReceiptHistoryItem): Promise<void> {
     const result = await this.receiptService.updateReceipt(item.id, {
       merchant_name: this.editMerchant().trim() || null,
       total_amount: this.editAmount() ?? null,
-      receipt_date: item.receipt_date,
-      currency: item.currency
+      receipt_date: this.editDate() || null,
+      currency: item.currency,
+      category_id: this.editCategoryId()
     });
 
     if (!result.success) {
@@ -139,6 +161,14 @@ export class ReceiptHistoryPageComponent {
   onEditAmountChange(value: string): void {
     const parsed = Number(value);
     this.editAmount.set(Number.isFinite(parsed) ? parsed : null);
+  }
+
+  onEditDateChange(value: string): void {
+    this.editDate.set(value);
+  }
+
+  onEditCategoryChange(value: string): void {
+    this.editCategoryId.set(value || null);
   }
 
   isSelected(item: ReceiptHistoryItem): boolean {
@@ -231,6 +261,7 @@ export class ReceiptHistoryPageComponent {
     this.loading.set(true);
     this.feedback.set('');
     this.selectedIds.set(new Set());
+    this.failedPreviewIds.set(new Set());
 
     const filters = this.filterForm.getRawValue();
     const { startDate, endDate } = this.resolveDateRange(filters.year, filters.month);

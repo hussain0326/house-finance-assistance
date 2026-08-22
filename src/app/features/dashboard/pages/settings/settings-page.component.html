@@ -21,6 +21,20 @@
             <mat-error>Last name is required.</mat-error>
           }
         </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Default currency</mat-label>
+          <mat-select formControlName="defaultCurrency" aria-label="Default currency">
+            @for (currency of currencies; track currency) {
+              <mat-option [value]="currency">{{ currency }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.defaultCurrency.hasError('required')) {
+            <mat-error>Default currency is required.</mat-error>
+          }
+        </mat-form-field>
+        <p class="settings-help-text">
+          Dashboard, analytics, and receipt history convert totals to this currency using the latest stored exchange rates.
+        </p>
         <p class="settings-feedback" aria-live="polite">{{ feedback() }}</p>
         <button mat-flat-button color="primary" type="submit" [disabled]="isSaving()">
           Save profile
@@ -60,6 +74,34 @@
           Update password
         </button>
       </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="settings-card help-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>help</mat-icon>
+      <mat-card-title>Help & Support</mat-card-title>
+      <mat-card-subtitle>Quick answers for common account and receipt tasks.</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="help-list">
+        <section>
+          <h3>Receipt scanning</h3>
+          <p>Upload a receipt photo and the app extracts merchant, date, amount, currency, and category.</p>
+        </section>
+        <section>
+          <h3>Fix OCR details</h3>
+          <p>Use Receipt History to edit merchant, amount, date, or category when the scan reads something incorrectly.</p>
+        </section>
+        <section>
+          <h3>Currency conversion</h3>
+          <p>Set your default currency in Profile. Original receipt amounts stay preserved while reports use refreshed exchange rates.</p>
+        </section>
+        <section>
+          <h3>Password changes</h3>
+          <p>Use Account security while signed in, or use Forgot password on the sign-in page if you cannot access the account.</p>
+        </section>
+      </div>
     </mat-card-content>
   </mat-card>
 </section>

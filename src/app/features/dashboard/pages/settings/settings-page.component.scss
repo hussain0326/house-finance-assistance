@@ -22,9 +22,39 @@
   padding-top: 1rem;
 }
 
+.settings-help-text {
+  margin: -0.25rem 0 0.5rem;
+  color: #64748b;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
 .settings-feedback {
   min-height: 1.5rem;
   margin: 0;
   color: #475569;
   font-size: 0.875rem;
+}
+
+.help-card mat-card-content {
+  padding-top: 1rem;
+}
+
+.help-list {
+  display: grid;
+  gap: 0.875rem;
+}
+
+.help-list h3 {
+  margin: 0 0 0.25rem;
+  color: #0f172a;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.help-list p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.875rem;
+  line-height: 1.45;
 }

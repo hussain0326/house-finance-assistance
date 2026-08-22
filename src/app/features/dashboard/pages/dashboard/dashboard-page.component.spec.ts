@@ -21,7 +21,8 @@ describe('DashboardPageComponent', () => {
       getProfile: jasmine.createSpy('getProfile').and.returnValue({
         firstName: 'Alex',
         lastName: 'Morgan',
-        email: 'alex@example.com'
+        email: 'alex@example.com',
+        defaultCurrency: 'EUR'
       })
     };
 

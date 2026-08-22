@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { SupabaseService } from '../supabase/supabase.service';
+import { environment } from '../../../environments/environment';
 
 export type AuthActionResult = {
   error: string | null;
@@ -13,7 +14,47 @@ export type UserProfile = {
   readonly firstName: string;
   readonly lastName: string;
   readonly email: string;
+  readonly defaultCurrency: string;
 };
+
+export const SUPPORTED_CURRENCIES = [
+  'EUR',
+  'USD',
+  'CAD',
+  'MXN',
+  'BRL',
+  'ARS',
+  'CLP',
+  'COP',
+  'PEN',
+  'GBP',
+  'CHF',
+  'DKK',
+  'SEK',
+  'NOK',
+  'PLN',
+  'CZK',
+  'HUF',
+  'RON',
+  'BGN',
+  'TRY',
+  'ISK',
+  'JPY',
+  'CNY',
+  'HKD',
+  'SGD',
+  'INR',
+  'KRW',
+  'THB',
+  'IDR',
+  'MYR',
+  'PHP',
+  'VND',
+  'AED',
+  'SAR',
+  'ILS'
+] as const;
+export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
 
 export const STRONG_PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 export const STRONG_PASSWORD_MESSAGE =
@@ -63,7 +104,8 @@ export class AuthService {
     return {
       firstName: typeof metadata['first_name'] === 'string' ? metadata['first_name'] : '',
       lastName: typeof metadata['last_name'] === 'string' ? metadata['last_name'] : '',
-      email: user?.email ?? ''
+      email: user?.email ?? '',
+      defaultCurrency: this.normalizeCurrency(metadata['default_currency'])
     };
   }
 
@@ -71,13 +113,15 @@ export class AuthService {
     email: string,
     password: string,
     firstName: string,
-    lastName: string
+    lastName: string,
+    defaultCurrency = 'EUR'
   ): Promise<AuthActionResult> {
     if (!this.isConfigurationReady()) {
       return { error: this.getConfigurationError() };
     }
 
-    const emailRedirectTo = `${window.location.origin}/auth`;
+    const emailRedirectTo = this.getAuthRedirectUrl();
+    const normalizedCurrency = this.normalizeCurrency(defaultCurrency);
     const { data, error } = await this.supabaseService.client.auth.signUp({
       email,
       password,
@@ -85,7 +129,8 @@ export class AuthService {
         emailRedirectTo,
         data: {
           first_name: firstName.trim(),
-          last_name: lastName.trim()
+          last_name: lastName.trim(),
+          default_currency: normalizedCurrency
         }
       }
     });
@@ -112,7 +157,7 @@ export class AuthService {
       return { error: PASSWORD_RESET_RATE_LIMIT_MESSAGE };
     }
 
-    const redirectTo = `${window.location.origin}/auth`;
+    const redirectTo = this.getAuthRedirectUrl();
     const { error } = await this.supabaseService.client.auth.resetPasswordForEmail(email, {
       redirectTo
     });
@@ -146,15 +191,21 @@ export class AuthService {
     return { error: null, message: 'Password updated successfully.' };
   }
 
-  async updateProfile(firstName: string, lastName: string): Promise<AuthActionResult> {
+  async updateProfile(
+    firstName: string,
+    lastName: string,
+    defaultCurrency: string
+  ): Promise<AuthActionResult> {
     if (!this.isConfigurationReady()) {
       return { error: this.getConfigurationError() };
     }
 
+    const normalizedCurrency = this.normalizeCurrency(defaultCurrency);
     const { data, error } = await this.supabaseService.client.auth.updateUser({
       data: {
         first_name: firstName.trim(),
-        last_name: lastName.trim()
+        last_name: lastName.trim(),
+        default_currency: normalizedCurrency
       }
     });
     if (error) {
@@ -254,6 +305,18 @@ export class AuthService {
 
   private isConfigurationReady(): boolean {
     return this.supabaseService.isConfigured ?? true;
+  }
+
+  private getAuthRedirectUrl(): string {
+    const configuredAppUrl = (environment.appUrl ?? '').trim().replace(/\/$/, '');
+    const origin = configuredAppUrl || (typeof window === 'undefined' ? '' : window.location.origin);
+    return `${origin}/auth`;
+  }
+
+  private normalizeCurrency(value: unknown): SupportedCurrency {
+    return typeof value === 'string' && SUPPORTED_CURRENCIES.includes(value as SupportedCurrency)
+      ? (value as SupportedCurrency)
+      : 'EUR';
   }
 
   private getConfigurationError(): string {

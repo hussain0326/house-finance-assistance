@@ -40,6 +40,29 @@ describe('AuthPageComponent', () => {
     expect(component.isSignInMode()).toBeFalse();
   });
 
+  it('should pass default currency when signing up', async () => {
+    const fixture = TestBed.createComponent(AuthPageComponent);
+    const component = fixture.componentInstance;
+    component.toggleMode();
+    component.form.setValue({
+      email: 'new@example.com',
+      password: 'New-password123!',
+      firstName: 'New',
+      lastName: 'User',
+      defaultCurrency: 'USD'
+    });
+
+    await component.submit();
+
+    expect(authService.signUp).toHaveBeenCalledWith(
+      'new@example.com',
+      'New-password123!',
+      'New',
+      'User',
+      'USD'
+    );
+  });
+
   it('should open an email-only password reset flow', async () => {
     const fixture = TestBed.createComponent(AuthPageComponent);
     const component = fixture.componentInstance;

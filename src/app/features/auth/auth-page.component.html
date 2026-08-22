@@ -41,6 +41,18 @@
                 <mat-error *ngIf="form.controls.lastName.hasError('required')">Last name is required.</mat-error>
               </mat-form-field>
             </div>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Default currency</mat-label>
+              <mat-select formControlName="defaultCurrency" aria-label="Default currency">
+                @for (currency of currencies; track currency) {
+                  <mat-option [value]="currency">{{ currency }}</mat-option>
+                }
+              </mat-select>
+              <mat-error *ngIf="form.controls.defaultCurrency.hasError('required')">
+                Default currency is required.
+              </mat-error>
+            </mat-form-field>
           }
 
           @if (!isForgotPassword()) {

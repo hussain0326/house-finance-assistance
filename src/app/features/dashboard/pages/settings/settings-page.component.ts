@@ -5,11 +5,20 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { AuthService, STRONG_PASSWORD_PATTERN } from '../../../../core/auth/auth.service';
+import { MatSelectModule } from '@angular/material/select';
+import { AuthService, STRONG_PASSWORD_PATTERN, SUPPORTED_CURRENCIES } from '../../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-settings-page',
-  imports: [ReactiveFormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule],
+  imports: [
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatSelectModule
+  ],
   templateUrl: './settings-page.component.html',
   styleUrl: './settings-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -22,10 +31,12 @@ export class SettingsPageComponent {
   readonly isChangingPassword = signal(false);
   readonly feedback = signal<string | null>(null);
   readonly passwordFeedback = signal<string | null>(null);
+  readonly currencies = SUPPORTED_CURRENCIES;
   readonly profile = this.authService.getProfile();
   readonly form = this.formBuilder.nonNullable.group({
     firstName: [this.profile.firstName, [Validators.required, Validators.maxLength(60)]],
-    lastName: [this.profile.lastName, [Validators.required, Validators.maxLength(60)]]
+    lastName: [this.profile.lastName, [Validators.required, Validators.maxLength(60)]],
+    defaultCurrency: [this.profile.defaultCurrency, [Validators.required]]
   });
   readonly passwordForm = this.formBuilder.nonNullable.group({
     password: ['', [Validators.required, Validators.pattern(STRONG_PASSWORD_PATTERN)]],
@@ -40,8 +51,8 @@ export class SettingsPageComponent {
 
     this.isSaving.set(true);
     this.feedback.set(null);
-    const { firstName, lastName } = this.form.getRawValue();
-    const result = await this.authService.updateProfile(firstName, lastName);
+    const { firstName, lastName, defaultCurrency } = this.form.getRawValue();
+    const result = await this.authService.updateProfile(firstName, lastName, defaultCurrency);
     this.isSaving.set(false);
     this.feedback.set(result.error ?? result.message ?? 'Profile updated.');
   }

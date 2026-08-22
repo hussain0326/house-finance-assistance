@@ -67,14 +67,19 @@ describe('ReceiptService', () => {
   });
 
   it('updateReceipt should return success when update has no error', async () => {
+    const updateSpy = jasmine.createSpy('update').and.returnValue({
+      eq: () => Promise.resolve({ error: null })
+    });
     mockSupabaseService.client.from.and.returnValue({
-      update: () => ({
-        eq: () => Promise.resolve({ error: null })
-      })
+      update: updateSpy
     });
 
-    const result = await service.updateReceipt('id-1', { merchant_name: 'Store' });
+    const result = await service.updateReceipt('id-1', {
+      merchant_name: 'Store',
+      category_id: 'category-1'
+    });
 
     expect(result.success).toBeTrue();
+    expect(updateSpy).toHaveBeenCalledWith(jasmine.objectContaining({ category_id: 'category-1' }));
   });
 });
