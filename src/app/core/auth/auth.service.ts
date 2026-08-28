@@ -60,7 +60,7 @@ export const STRONG_PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-
 export const STRONG_PASSWORD_MESSAGE =
   'Use at least 8 characters with uppercase, lowercase, a number, and a symbol.';
 
-// Public, shared account for recruiters/reviewers to try the app without signing up.
+// Public, shared account to try the app without signing up.
 export const DEMO_ACCOUNT_EMAIL = 'demo@homefinance.app';
 export const DEMO_ACCOUNT_PASSWORD = 'HomeFinanceDemo1!';
 const DEMO_ACCOUNT_RESTRICTED_MESSAGE =
