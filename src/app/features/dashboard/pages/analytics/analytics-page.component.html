@@ -1,24 +1,31 @@
-<section class="grid gap-4 lg:grid-cols-2">
+<section class="analytics-layout grid gap-4 lg:grid-cols-2">
   @if (feedback()) {
-    <p class="lg:col-span-2 rounded-lg bg-slate-100 px-4 py-3 text-sm text-slate-600" aria-live="polite">
+    <p class="feedback-banner lg:col-span-2" aria-live="polite">
+      <mat-icon>info</mat-icon>
       {{ feedback() }}
     </p>
   }
 
   <div class="lg:col-span-2 grid gap-3 sm:grid-cols-2">
-    <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
-      <p class="m-0 text-sm text-slate-600">Categorized spending</p>
-      <p class="m-0 mt-1 text-2xl font-semibold">{{ categoryTotal() | currency: currencyCode() }}</p>
+    <div class="metric-card">
+      <div class="metric-icon metric-icon--category"><mat-icon>account_balance_wallet</mat-icon></div>
+      <div>
+        <p class="m-0 text-sm text-slate-600">Categorized spending</p>
+        <p class="m-0 mt-1 text-2xl font-semibold">{{ categoryTotal() | currency: currencyCode() }}</p>
+      </div>
     </div>
-    <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
-      <p class="m-0 text-sm text-slate-600">Latest month</p>
-      <p class="m-0 mt-1 text-2xl font-semibold">{{ monthlyTotal() | currency: currencyCode() }}</p>
+    <div class="metric-card">
+      <div class="metric-icon metric-icon--month"><mat-icon>calendar_month</mat-icon></div>
+      <div>
+        <p class="m-0 text-sm text-slate-600">Latest month</p>
+        <p class="m-0 mt-1 text-2xl font-semibold">{{ monthlyTotal() | currency: currencyCode() }}</p>
+      </div>
     </div>
   </div>
 
   <mat-card appearance="outlined" class="analytic-card p-4">
     <div class="card-head">
-      <mat-icon>pie_chart</mat-icon>
+      <div class="analytic-icon analytic-icon--category"><mat-icon>donut_large</mat-icon></div>
       <div>
         <h2 class="m-0 text-xl font-semibold">Category Breakdown</h2>
         <p class="mt-1 text-slate-600">All categorized receipt spending by category.</p>
@@ -27,14 +34,14 @@
     <div
       echarts
       [options]="categoryChartOptions()"
-      class="chart-surface mt-3 h-72 rounded-xl border border-slate-200"
+      class="chart-surface mt-3 h-72 border border-slate-200"
       aria-label="Category breakdown chart"
     >@if (loading()) { Loading analytics... }</div>
   </mat-card>
 
   <mat-card appearance="outlined" class="analytic-card p-4">
     <div class="card-head">
-      <mat-icon>bar_chart</mat-icon>
+      <div class="analytic-icon analytic-icon--trend"><mat-icon>bar_chart</mat-icon></div>
       <div>
         <h2 class="m-0 text-xl font-semibold">Monthly Comparison</h2>
         <p class="mt-1 text-slate-600">Track spend movement over the year.</p>
@@ -43,14 +50,14 @@
     <div
       echarts
       [options]="comparisonChartOptions()"
-      class="chart-surface mt-3 h-72 rounded-xl border border-slate-200"
+      class="chart-surface mt-3 h-72 border border-slate-200"
       aria-label="Monthly comparison chart"
     ></div>
   </mat-card>
 
   <mat-card appearance="outlined" class="analytic-card p-4 lg:col-span-2">
     <div class="card-head">
-      <mat-icon>filter_alt</mat-icon>
+      <div class="analytic-icon analytic-icon--filter"><mat-icon>tune</mat-icon></div>
       <div>
         <h2 class="m-0 text-xl font-semibold">Filter Spending</h2>
         <p class="mt-1 text-slate-600">Search by merchant, category, month, or year to see the total spent.</p>
@@ -104,8 +111,14 @@
       </mat-form-field>
 
       <div class="md:col-span-5 flex flex-wrap gap-2">
-        <button mat-flat-button color="primary" type="submit" [disabled]="filterLoading()">Apply Filters</button>
-        <button mat-button type="button" (click)="resetFilters()" [disabled]="filterLoading()">Reset</button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="filterLoading()">
+          <mat-icon>filter_alt</mat-icon>
+          Apply Filters
+        </button>
+        <button mat-button type="button" (click)="resetFilters()" [disabled]="filterLoading()">
+          <mat-icon>restart_alt</mat-icon>
+          Reset
+        </button>
       </div>
     </form>
 
@@ -113,8 +126,8 @@
       <div class="mt-4 grid gap-2">
         <h3 class="m-0 text-base font-semibold">Spending by Country</h3>
         @for (country of countryBreakdown(); track country.country_code) {
-          <div class="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm">
-            <span>{{ country.country_name }}</span>
+          <div class="country-row">
+            <span class="country-name"><mat-icon>public</mat-icon>{{ country.country_name }}</span>
             <span class="font-semibold">{{ country.total_amount | currency: currencyCode() }}</span>
           </div>
         }

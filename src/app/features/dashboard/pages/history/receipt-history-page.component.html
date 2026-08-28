@@ -1,7 +1,7 @@
 <mat-card appearance="outlined" class="history-card p-4">
   <div class="history-head">
     <div class="head-icon">
-      <mat-icon>history</mat-icon>
+      <mat-icon>receipt_long</mat-icon>
     </div>
     <div>
       <h2 class="m-0 text-xl font-semibold">Receipt History</h2>
@@ -46,17 +46,23 @@
     </mat-form-field>
 
     <div class="md:col-span-4 flex flex-wrap gap-2">
-      <button mat-flat-button color="primary" type="submit" [disabled]="loading()">Apply Filters</button>
-      <button mat-button type="button" (click)="resetFilters()" [disabled]="loading()">Reset</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="loading()">
+        <mat-icon>filter_alt</mat-icon>
+        Apply Filters
+      </button>
+      <button mat-button type="button" (click)="resetFilters()" [disabled]="loading()">
+        <mat-icon>restart_alt</mat-icon>
+        Reset
+      </button>
     </div>
   </form>
 
   @if (feedback()) {
-    <p class="mt-3 text-sm text-slate-600" aria-live="polite">{{ feedback() }}</p>
+    <p class="history-feedback" aria-live="polite"><mat-icon>info</mat-icon>{{ feedback() }}</p>
   }
 
   @if (items().length) {
-    <div class="mt-4 flex items-center justify-between">
+    <div class="history-toolbar">
       <mat-checkbox [checked]="isAllSelected()" (change)="toggleSelectAll($event.checked)">
         Select all on this page
       </mat-checkbox>
@@ -68,6 +74,7 @@
           [disabled]="deleting()"
           (click)="deleteSelected()"
         >
+          <mat-icon>delete</mat-icon>
           Delete Selected ({{ selectedIds().size }})
         </button>
       }
@@ -76,7 +83,7 @@
 
   <div class="mt-4 grid gap-3">
     @for (item of items(); track trackById($index, item)) {
-      <article class="history-row rounded-xl border border-slate-200 bg-white/80 p-3">
+      <article class="history-row p-3">
         <div class="grid gap-3 md:grid-cols-[auto_96px_1fr_auto] md:items-center">
           <mat-checkbox
             [checked]="isSelected(item)"
@@ -181,8 +188,14 @@
                   }
                 </select>
                 <div class="edit-actions">
-                  <button mat-stroked-button color="primary" type="button" (click)="saveEdit(item)">Save</button>
-                  <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+                  <button mat-stroked-button color="primary" type="button" (click)="saveEdit(item)">
+                    <mat-icon>save</mat-icon>
+                    Save
+                  </button>
+                  <button mat-button type="button" (click)="cancelEdit()">
+                    <mat-icon>close</mat-icon>
+                    Cancel
+                  </button>
                 </div>
               </div>
             } @else {
@@ -208,7 +221,10 @@
             }
             <p class="m-0 text-xs text-slate-500">Receipt ID: {{ item.id }}</p>
             @if (editingId() !== item.id) {
-              <button class="mt-2" mat-button type="button" (click)="startEdit(item)">Edit details</button>
+              <button class="mt-2" mat-button type="button" (click)="startEdit(item)">
+                <mat-icon>edit</mat-icon>
+                Edit details
+              </button>
             }
           </div>
 

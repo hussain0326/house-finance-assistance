@@ -1,39 +1,33 @@
-<section class="mb-5">
-  <h2 class="m-0 text-2xl font-semibold text-slate-900">
-    Welcome back{{ profile().firstName ? ', ' + profile().firstName : '' }}
-  </h2>
-  <p class="mb-0 mt-1 text-sm text-slate-600">Here is your spending snapshot.</p>
+<section class="dashboard-intro">
+  <div class="intro-icon"><mat-icon>home</mat-icon></div>
+  <div>
+    <h2 class="m-0 text-2xl font-semibold text-slate-900">
+      Welcome back{{ profile().firstName ? ', ' + profile().firstName : '' }}
+    </h2>
+    <p class="mb-0 mt-1 text-sm text-slate-600">Here is your spending snapshot.</p>
+  </div>
 </section>
 
 <section class="grid gap-4 md:grid-cols-3" aria-label="Spending summary cards">
   <mat-card class="summary-card elevated-card" appearance="outlined">
-    <mat-card-header>
-      <mat-card-title class="card-title-wrap">
-        <mat-icon>calendar_month</mat-icon>
-        Monthly Spending
-      </mat-card-title>
-    </mat-card-header>
-    <mat-card-content class="pt-2 text-3xl font-semibold">{{ monthlySpend() | currency: currencyCode() }}</mat-card-content>
+    <mat-card-content>
+      <div class="summary-label"><span class="metric-icon metric-icon--month"><mat-icon>calendar_month</mat-icon></span>Monthly Spending</div>
+      <p class="summary-value">{{ monthlySpend() | currency: currencyCode() }}</p>
+    </mat-card-content>
   </mat-card>
 
   <mat-card class="summary-card elevated-card" appearance="outlined">
-    <mat-card-header>
-      <mat-card-title class="card-title-wrap">
-        <mat-icon>event_repeat</mat-icon>
-        Annual Spending
-      </mat-card-title>
-    </mat-card-header>
-    <mat-card-content class="pt-2 text-3xl font-semibold">{{ annualSpend() | currency: currencyCode() }}</mat-card-content>
+    <mat-card-content>
+      <div class="summary-label"><span class="metric-icon metric-icon--annual"><mat-icon>event_repeat</mat-icon></span>Annual Spending</div>
+      <p class="summary-value">{{ annualSpend() | currency: currencyCode() }}</p>
+    </mat-card-content>
   </mat-card>
 
   <mat-card class="summary-card elevated-card" appearance="outlined">
-    <mat-card-header>
-      <mat-card-title class="card-title-wrap">
-        <mat-icon>insights</mat-icon>
-        Average Daily Spend
-      </mat-card-title>
-    </mat-card-header>
-    <mat-card-content class="pt-2 text-3xl font-semibold">{{ avgSpend() | currency: currencyCode() }}</mat-card-content>
+    <mat-card-content>
+      <div class="summary-label"><span class="metric-icon metric-icon--average"><mat-icon>insights</mat-icon></span>Average Daily Spend</div>
+      <p class="summary-value">{{ avgSpend() | currency: currencyCode() }}</p>
+    </mat-card-content>
   </mat-card>
 </section>
 
@@ -41,21 +35,29 @@
   <mat-card appearance="outlined" class="elevated-card">
     <mat-card-header>
       <mat-card-title class="card-title-wrap">
-        <mat-icon>receipt_long</mat-icon>
+        <span class="section-icon section-icon--receipts"><mat-icon>receipt_long</mat-icon></span>
         Recent Expenses
       </mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <ul class="mt-2 flex list-none flex-col gap-3 p-0">
         @for (expense of recentExpenses(); track expense.merchant + expense.date) {
-          <li class="rounded-xl border border-slate-200 bg-white/70 px-3 py-3">
+          <li class="expense-row">
             <div class="flex items-center justify-between gap-4">
-              <div>
+              <div class="expense-details">
+                <span class="expense-icon"><mat-icon>receipt</mat-icon></span>
+                <div>
                 <p class="m-0 font-medium">{{ expense.merchant }}</p>
                 <p class="m-0 text-sm text-slate-600">{{ expense.category }} • {{ expense.date | date }}</p>
+                </div>
               </div>
               <strong>{{ expense.amount | currency: currencyCode() }}</strong>
             </div>
+          </li>
+        } @empty {
+          <li class="empty-expenses">
+            <mat-icon>receipt_long</mat-icon>
+            <span>Your recent receipts will appear here.</span>
           </li>
         }
       </ul>
@@ -65,7 +67,7 @@
   <mat-card appearance="outlined" class="elevated-card">
     <mat-card-header>
       <mat-card-title class="card-title-wrap">
-        <mat-icon>trending_up</mat-icon>
+        <span class="section-icon section-icon--trend"><mat-icon>trending_up</mat-icon></span>
         Spending Trends
       </mat-card-title>
     </mat-card-header>
@@ -73,7 +75,7 @@
       <div
         echarts
         [options]="trendChartOptions()"
-        class="chart-host mt-2 h-64 rounded-xl"
+        class="chart-host mt-2 h-64"
         aria-label="Monthly spending trend chart"
       >
       </div>

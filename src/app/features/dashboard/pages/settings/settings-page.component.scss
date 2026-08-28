@@ -12,8 +12,30 @@
   border-color: #e2e8f0;
 }
 
-.settings-card .mat-icon {
-  color: #2563eb;
+.settings-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 21px;
+  line-height: 1;
+}
+
+.profile-avatar {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.security-avatar {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.help-avatar {
+  background: #fef3c7;
+  color: #b45309;
 }
 
 .settings-form {

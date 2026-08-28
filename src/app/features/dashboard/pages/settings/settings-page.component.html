@@ -1,7 +1,7 @@
 <section class="settings-layout">
   <mat-card appearance="outlined" class="settings-card">
     <mat-card-header>
-      <mat-icon mat-card-avatar>account_circle</mat-icon>
+      <mat-icon mat-card-avatar class="settings-avatar profile-avatar">manage_accounts</mat-icon>
       <mat-card-title>Profile</mat-card-title>
       <mat-card-subtitle>{{ profile.email || 'Account details' }}</mat-card-subtitle>
     </mat-card-header>
@@ -45,7 +45,7 @@
 
   <mat-card appearance="outlined" class="settings-card">
     <mat-card-header>
-      <mat-icon mat-card-avatar>shield</mat-icon>
+      <mat-icon mat-card-avatar class="settings-avatar security-avatar">lock</mat-icon>
       <mat-card-title>Account security</mat-card-title>
       <mat-card-subtitle>Choose a new password to protect your account.</mat-card-subtitle>
     </mat-card-header>
@@ -79,7 +79,7 @@
 
   <mat-card appearance="outlined" class="settings-card help-card">
     <mat-card-header>
-      <mat-icon mat-card-avatar>help</mat-icon>
+      <mat-icon mat-card-avatar class="settings-avatar help-avatar">support_agent</mat-icon>
       <mat-card-title>Help & Support</mat-card-title>
       <mat-card-subtitle>Quick answers for common account and receipt tasks.</mat-card-subtitle>
     </mat-card-header>

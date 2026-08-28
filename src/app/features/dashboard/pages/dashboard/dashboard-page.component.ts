@@ -82,7 +82,7 @@ export class DashboardPageComponent {
     this.recentExpenses.set(
       history.items.map((item) => ({
         merchant: item.merchant_name ?? 'Unknown Merchant',
-        category: item.processing_status,
+        category: item.category_name ?? 'Uncategorized',
         amount: item.total_amount ?? 0,
         date: item.receipt_date ?? item.created_at
       }))

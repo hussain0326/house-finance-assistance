@@ -2,7 +2,7 @@
   <mat-sidenav mode="side" opened class="layout-side w-64" [fixedInViewport]="isMobile()" [opened]="!isMobile()">
     <div class="brand-block px-4 py-5">
       <div class="brand-mark">
-        <mat-icon>account_balance_wallet</mat-icon>
+        <img src="favicon.svg" alt="" />
       </div>
       <div>
         <h1 class="text-xl font-semibold tracking-tight">Home Finance</h1>
@@ -13,8 +13,8 @@
     <mat-nav-list class="nav-list">
       @for (item of navItems; track item.route) {
         <a mat-list-item [routerLink]="item.route" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
-          <mat-icon>{{ item.icon }}</mat-icon>
-          <span>{{ item.label }}</span>
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
         </a>
       }
     </mat-nav-list>
@@ -24,7 +24,7 @@
   <mat-sidenav-content>
     <mat-toolbar class="topbar sticky top-0 z-30 px-4" color="transparent">
       <div class="toolbar-title-wrap">
-        <mat-icon>{{ currentPageIcon() }}</mat-icon>
+        <span class="toolbar-page-icon"><mat-icon>{{ currentPageIcon() }}</mat-icon></span>
         <div class="toolbar-copy">
           <span class="toolbar-heading">{{ currentPageTitle() }}</span>
           <span class="toolbar-subheading">{{ currentPageSubtitle() }}</span>

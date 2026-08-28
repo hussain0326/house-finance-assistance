@@ -1,255 +1,186 @@
-# AI Household Finance Assistant
+# Home Finance
 
-AI Household Finance Assistant is an Angular and Supabase application for scanning receipts, organizing expenses, analyzing spending, and asking questions about household finance data.
+Home Finance is a full-stack personal-finance progressive web app. It helps people turn receipts into reviewable expense records, understand household spending, and ask data-grounded questions about their finances.
 
-The app is designed as a small fintech-style dashboard with authentication, private receipt storage, OCR-assisted receipt extraction, live currency conversion, category analytics, and an AI assistant that answers questions using the user's own receipt data.
+Built as a portfolio project, it demonstrates product-focused frontend development, serverless backend integration, AI-assisted workflows, secure data handling, and automated quality checks.
 
-## What The App Does
+> **Scope:** Home Finance is a technical showcase, not financial advice. Configure your own Supabase project and OpenAI key before processing real receipts.
 
-- Sign up, sign in, reset password, and update account details with Supabase Auth.
-- Upload receipt images or PDFs to private Supabase Storage.
-- Process receipts with an OpenAI-backed Supabase Edge Function.
-- Extract merchant, receipt date, amount, currency, and category.
-- Preserve the original receipt amount/currency and convert reports to the user's default currency.
-- Track receipt country for travel spending and country-based analytics.
-- Refresh exchange rates daily and use the latest stored rates for analytics.
-- Browse receipt history and correct OCR mistakes such as merchant, amount, date, and category.
-- View dashboard summaries, category breakdowns, monthly trends, and filtered analytics.
-- Ask the AI assistant questions about spending, merchants, categories, and trends.
 
-## How It Works
+### The problem
+
+Receipt-based expense tracking is tedious: data must be captured, categorised, corrected, and made useful across different currencies. Generic chat interfaces also risk producing answers that are not backed by a user's actual financial data.
+
+### The solution
+
+Home Finance provides one connected workflow:
+
+1. A signed-in user uploads a JPG, PNG, or PDF receipt to private storage.
+2. A server-side function extracts the receipt data using AI and deterministic category and country rules.
+3. The user reviews and corrects the extracted data before relying on it.
+4. Dashboard and analytics views show trends, category splits, travel spending, and currency-aware totals.
+5. The AI assistant responds to questions using the user's scoped finance data.
+
+### Technical highlights
+
+| Capability | Implementation |
+| --- | --- |
+| Responsive product UI | Angular 20 standalone components, signals, Angular Material, Tailwind CSS v4, desktop sidebar, and mobile bottom navigation |
+| Secure identity and data access | Supabase Auth, protected routes, PostgreSQL Row Level Security, and private receipt storage |
+| AI workflow with user control | OpenAI-powered extraction, deterministic fallback rules, and an explicit edit/review step |
+| Accurate money handling | Original values retained, configurable reporting currency, live-rate refresh, and country-aware reporting |
+| Visual reporting | Apache ECharts for responsive dashboards and analytics |
+| Production discipline | Database migrations, Edge Functions, unit tests, production build, and GitHub Actions quality gate |
+
+### Architecture
 
 ```mermaid
-flowchart TD
-	A[Angular app] --> B[Supabase Auth]
-	A --> C[Private receipt upload]
-	C --> D[Supabase Storage]
-	A --> E[process-receipt Edge Function]
-	E --> D
-	E --> F[OpenAI receipt extraction]
-	E --> G[Receipts table]
-	H[currency-rates Edge Function] --> I[Exchange-rate provider]
-	H --> J[currency_rates table]
-	G --> K[Dashboard and analytics RPCs]
-	J --> K
-	K --> A
-	A --> L[ai-assistant Edge Function]
-	L --> K
+flowchart LR
+  Browser[Angular 20 PWA] --> Auth[Supabase Auth]
+  Browser --> Storage[Private Storage]
+  Browser --> ReceiptFn[Receipt Edge Function]
+  Browser --> AssistantFn[AI Assistant Edge Function]
+  ReceiptFn --> OpenAI[OpenAI API]
+  ReceiptFn --> DB[(PostgreSQL + RLS)]
+  AssistantFn --> DB
+  RatesFn[Currency Rates Edge Function] --> Rates[Exchange-rate provider]
+  RatesFn --> DB
+  DB --> Browser
 ```
 
-Receipt processing follows this flow:
+For implementation detail, see [docs/architecture.md](docs/architecture.md).
 
-1. The user uploads a JPG, PNG, or PDF receipt.
-2. The file is stored in the private `receipt-images` bucket.
-3. The `process-receipt` Edge Function downloads the file.
-4. Images are processed through OpenAI vision input; PDFs are processed through OpenAI document input.
-5. The function extracts receipt fields and applies deterministic category keyword rules.
-6. The function detects receipt country from address, merchant, language, and currency clues.
-7. The original receipt amount/currency are preserved.
-8. Reported amounts are converted using live rates stored in Supabase.
-9. The user can correct OCR mistakes in Receipt History.
+## Features
 
-## Currency Conversion
+- Email sign-up, sign-in, password reset, and user preferences.
+- Private receipt upload and AI-assisted extraction for images and PDFs.
+- Editable receipt history for correcting merchant, amount, date, category, and location data.
+- Dashboard totals, time trends, category breakdowns, and filtered analytics.
+- Original-currency retention with on-demand conversion to the user's selected reporting currency.
+- Spending-by-country analysis for travel expenses.
+- An assistant for questions about spending periods, categories, merchants, and trends.
 
-Users choose a default currency during signup and can change it later in Settings.
+## Technology
 
-The app stores the original receipt values separately from display/reporting values:
+| Area | Choice |
+| --- | --- |
+| Client | Angular 20, TypeScript, Angular Material, Tailwind CSS v4 |
+| Charts | Apache ECharts via `ngx-echarts` |
+| Backend | Supabase Auth, PostgreSQL, Storage, and Edge Functions |
+| AI | OpenAI APIs for receipt extraction and finance assistant responses |
+| Delivery | Progressive Web App service worker and Vercel configuration |
+| Testing | Jasmine, Karma, Chrome Headless, and GitHub Actions |
 
-- `original_total_amount`
-- `original_currency`
-- `exchange_rate`
-- `total_amount`
-- `currency`
+## Development Setup 
 
-Exchange rates are stored in `currency_rates`. The `currency-rates` Edge Function fetches the latest EUR-based rates from an exchange-rate provider and upserts them into Supabase. A scheduled Supabase cron job refreshes rates daily.
+### Prerequisites
 
-Dashboard, analytics, filtered analytics, and receipt history call database RPCs that convert amounts to the current default currency at query time. This means changing the default currency updates the actual displayed totals, not only the currency symbol.
+- Node.js 20.19 or later
+- npm 10 or later
+- A Supabase project
+- Supabase CLI for migrations and Edge Function deployment
+- An OpenAI API key for receipt processing and assistant features
 
-## Receipt Categories
+### Quick start
 
-The app combines AI extraction with deterministic keyword rules. The AI may suggest a category, but the Edge Function also checks merchant keywords for common cases.
+1. Install dependencies.
 
-Examples:
+   ```bash
+   npm install
+   ```
 
-- `Groceries`: Aldi, Lidl, Rewe, Edeka, Netto, supermarket, grocery
-- `Restaurant`: restaurant, cafe, bakery, pizza, burger, Namaste, Crobag, Slurp
-- `Transport`: Bahn, DSB, train, metro, taxi, parking, fuel, København H
-- `Healthcare`: pharmacy, Apotheke, clinic, doctor, dentist
-- `Clothing`: H&M, Zara, Uniqlo, Zalando, Nike, Adidas
-- `Travel`: hotel, Airbnb, Booking.com, airline, airport
-- `Education`: Hugendubel, bookstore, books, school, university, course
-- `Subscriptions`: GitHub, Microsoft, Apple, Google, iCloud, Dropbox, Adobe
+2. Create local configuration.
 
-Users can correct category mistakes from Receipt History.
+   ```bash
+   cp .env.example .env.local
+   ```
 
-## Country Tracking
+3. Update `.env.local` with your Supabase project values.
 
-Receipts store both `country_code` and `country_name` so travel spending can be filtered and summarized independently from currency.
+   ```text
+   SUPABASE_URL=https://your-project-ref.supabase.co
+   SUPABASE_ANON_KEY=your Supabase publishable key
+   APP_URL=http://localhost:4200
+   ```
 
-Country detection combines AI extraction with deterministic rules. Examples:
+4. Apply database migrations to your linked development project.
 
-- København, Danmark, or DKK -> Denmark (`DK`)
-- Berlin, Deutschland, or GmbH merchant names -> Germany (`DE`)
-- Paris or France -> France (`FR`)
-- London, UK, or GBP -> United Kingdom (`GB`)
+   ```bash
+   supabase db push
+   ```
 
-Analytics includes a country filter and a Spending by Country summary. The AI assistant can also answer questions such as "How much did I spend in Denmark?" using the same country filter.
+5. Configure Edge Function secrets in Supabase, then deploy the functions in `supabase/functions`.
 
-## User Help
+   ```bash
+   supabase secrets set OPENAI_API_KEY=your_key
+   supabase functions deploy process-receipt
+   supabase functions deploy ai-assistant
+   supabase functions deploy currency-rates
+   ```
 
-The Settings page includes help content for:
+6. Start the app and open `http://localhost:4200/`.
 
-- How receipt scanning works.
-- How to correct OCR mistakes.
-- How currency conversion works.
-- How to change the default currency.
-- How to update or reset a password.
+   ```bash
+   npm start
+   ```
 
-Receipt History is the main correction workflow. Users can edit merchant, amount, receipt date, and category after scanning.
+### Quality checks
 
-## Tech Stack
+| Command | Purpose |
+| --- | --- |
+| `npm start` | Run the development server |
+| `npm run build` | Generate an optimized production build |
+| `npm test` | Run unit tests in watch mode |
+| `npm run test:ci` | Run unit tests once in Chrome Headless |
+| `npm run verify` | Run the production build and headless test suite |
 
-- Angular 20 standalone components
-- Angular Material
-- Tailwind CSS v4
-- Apache ECharts via `ngx-echarts`
-- Supabase Auth
-- Supabase PostgreSQL
-- Supabase Storage
-- Supabase Edge Functions
-- OpenAI APIs
+`npm run verify` is the project quality gate and is executed by [the GitHub Actions workflow](.github/workflows/quality.yml). The current frontend test suite covers application setup, authentication and route guards, Supabase configuration, page components, receipt workflows, and AI assistant success and error states.
 
-## Project Structure
+### Project layout
 
 ```text
 src/app/
-	core/
-		auth/
-		supabase/
-	features/
-		auth/
-		dashboard/
-			pages/
-				analytics/
-				assistant/
-				dashboard/
-				history/
-				receipt/
-				settings/
-			services/
+  core/                  Shared auth and Supabase integration
+  features/
+    auth/                Authentication page
+    dashboard/
+      pages/             Dashboard, receipt, history, analytics, assistant, settings
+      services/          Receipt and assistant client services
 
 supabase/
-	functions/
-		ai-assistant/
-		currency-rates/
-		process-receipt/
-	migrations/
+  functions/             Server-side receipt, assistant, and rate workflows
+  migrations/            Versioned database schema and reporting changes
 ```
 
-## Configuration
+## Security and Data Handling
 
-The Angular app expects Supabase configuration in the environment files:
+- Browser code uses the Supabase publishable key only. This key is intended for public clients; Row Level Security is the authorization boundary.
+- `OPENAI_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` belong only in Supabase Edge Function secrets, never Angular environment files.
+- Receipt files are stored in the private `receipt-images` bucket and should be served with signed URLs.
+- Angular route guards improve navigation, but PostgreSQL RLS policies must enforce per-user data isolation.
+- AI extraction is treated as a draft: users can review and correct receipt data before using it in reports.
 
-- `src/environments/environment.ts`
-- `src/environments/environment.prod.ts`
+## Deployment
 
-Runtime configuration is generated before `start`, `build`, `watch`, and `test` by `scripts/write-env.mjs`.
+Vercel is configured to build with `npm run build` and serve `dist/house-finance-assistance/browser`, including an SPA rewrite. Before production deployment:
 
-Create a local `.env.local` file from `.env.example`:
+1. Apply the Supabase migrations.
+2. Deploy the Edge Functions and configure their secrets.
+3. Set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `APP_URL` in the hosting environment.
+4. Add `<APP_URL>/auth` to the allowed Supabase Auth redirect URLs.
+5. Run `npm run verify`.
 
-```bash
-cp .env.example .env.local
-```
+## Important Implementation Notes
 
-Set these values locally and in Vercel project environment variables:
+- Reports use receipt date rather than upload date.
+- The app preserves `original_total_amount`, `original_currency`, and `exchange_rate` alongside reporting values.
+- Exchange rates refresh daily. Current reporting uses the latest stored rate rather than a historical rate at the time of purchase.
+- Country detection combines AI extraction with address, merchant, language, and currency clues.
+- Database migrations are for schema and shared reference data, not normal user-created receipts or messages.
 
-```text
-SUPABASE_URL=https://dzrpnyxyxhtvowgcvoco.supabase.co
-SUPABASE_ANON_KEY=your Supabase publishable key
-APP_URL=https://hussain-home-finance-assistance.vercel.app
-```
+## Further Reading
 
-The build script also accepts common aliases such as `PUBLIC_SUPABASE_URL`, `VITE_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `VERCEL_PROJECT_PRODUCTION_URL`.
-
-The generated Angular files are ignored by Git:
-
-```text
-src/environments/environment.generated.ts
-src/environments/environment.generated.prod.ts
-```
-
-Password reset and email confirmation links use `${APP_URL}/auth` in production and `window.location.origin` locally when `LOCAL_APP_URL` is empty.
-
-The Supabase Auth dashboard must also allow the same production callback URL:
-
-```text
-https://hussain-home-finance-assistance.vercel.app/auth
-```
-
-The Supabase Edge Functions require these secrets:
-
-- `OPENAI_API_KEY`
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` for `currency-rates`
-- `CURRENCY_REFRESH_SECRET` optional, for protecting manual currency refresh calls
-
-## Database Migrations
-
-Database changes are tracked in `supabase/migrations`.
-
-Use migrations for schema and shared app data, such as:
-
-- receipt columns
-- analytics RPCs
-- currency rate tables
-- scheduled jobs
-- seed/reference data
-
-Avoid using migrations for normal user-created runtime data such as individual receipts or chat messages.
-
-## Development
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Start the local development server:
-
-```bash
-npm start
-```
-
-Open `http://localhost:4200/`.
-
-Build the app:
-
-```bash
-npm run build
-```
-
-Run unit tests:
-
-```bash
-npm test
-```
-
-## Supabase Edge Functions
-
-The main functions are:
-
-- `process-receipt`: OCR extraction, category detection, currency conversion, and receipt persistence.
-- `ai-assistant`: answers user questions using receipt analytics RPCs.
-- `currency-rates`: refreshes live exchange rates into the `currency_rates` table.
-
-Deploy functions with the Supabase CLI or the Supabase dashboard tooling used by the project.
-
-## Important Notes
-
-- Receipt analytics use the receipt date, not upload date.
-- PDFs are supported for OCR through the `process-receipt` Edge Function.
-- Private receipt files are accessed through signed URLs.
-- Users should review scanned receipts and correct OCR mistakes when needed.
-- Exchange rates are refreshed daily, but historical conversions are based on the latest stored rate unless the reporting RPCs are changed to use historical rate dates.
+- [Architecture guide](docs/architecture.md): boundaries, request flows, security model, and deployment checklist.
+- [Environment variable template](.env.example): client configuration values.
+- [Database migrations](supabase/migrations): schema and reporting evolution.
+- [Edge Functions](supabase/functions): receipt processing, assistant orchestration, and currency-rate refresh.

@@ -68,7 +68,9 @@ export class ReceiptPageComponent {
       );
       this.uploadSuccess.set(processingResult.success);
       if (processingResult.success) {
-        this.reviewMessage.set('Review the extracted date, country, category, and amount in History page. You can edit the receipt infos there.');
+        this.reviewMessage.set(
+          'Review the extracted date, country, category, and amount in Receipt History. You can edit the receipt details there.'
+        );
       }
     }
   }

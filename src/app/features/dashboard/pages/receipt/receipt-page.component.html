@@ -1,7 +1,7 @@
 <mat-card appearance="outlined" class="scan-card p-4">
   <div class="card-head">
     <div class="head-icon">
-      <mat-icon>upload_file</mat-icon>
+      <mat-icon>receipt_long</mat-icon>
     </div>
     <div>
       <h2 class="m-0 text-xl font-semibold">Upload Receipt</h2>
@@ -25,7 +25,10 @@
     />
 
     <button mat-stroked-button color="primary" type="button" class="!h-11 !rounded-xl !px-4" (click)="fileInput.click()">
-      Choose Receipt File
+      <span class="inline-flex items-center gap-2">
+        <mat-icon>attach_file</mat-icon>
+        Choose Receipt File
+      </span>
     </button>
 
     <button mat-stroked-button color="primary" type="button" class="!h-11 !rounded-xl !px-4" (click)="cameraInput.click()">
@@ -49,6 +52,9 @@
     >
       <span class="inline-flex items-center gap-2">
         <mat-spinner *ngIf="isUploading()" diameter="16"></mat-spinner>
+        @if (!isUploading()) {
+          <mat-icon>cloud_upload</mat-icon>
+        }
         Upload Receipt
       </span>
     </button>

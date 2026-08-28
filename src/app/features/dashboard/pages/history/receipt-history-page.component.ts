@@ -161,7 +161,7 @@ export class ReceiptHistoryPageComponent {
       currency: item.currency,
       category_id: this.editCategoryId(),
       country_code: this.editCountryCode(),
-      country_name: this.countryNameForCode(this.editCountryCode())
+      country_name: this.countryNameForCode(this.editCountryCode()) ?? item.country_name
     });
 
     if (!result.success) {
