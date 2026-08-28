@@ -162,13 +162,20 @@ supabase/
 
 ## Deployment
 
-Vercel is configured to build with `npm run build` and serve `dist/house-finance-assistance/browser`, including an SPA rewrite. Before production deployment:
+Vercel is configured to build with `npm run build` and serve `dist/house-finance-assistance/browser`, including an SPA rewrite. GitHub Actions deploys only after `npm run verify` passes on a push to `main`; pull requests run verification only.
 
-1. Apply the Supabase migrations.
-2. Deploy the Edge Functions and configure their secrets.
-3. Set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `APP_URL` in the hosting environment.
+### One-time GitHub and Vercel setup
+
+1. In Vercel, link the project once with `vercel link`, then copy the organization and project IDs from `.vercel/project.json`.
+2. In GitHub repository settings, add these **Actions secrets**:
+   - `VERCEL_TOKEN`: a Vercel token with access to this project.
+   - `VERCEL_ORG_ID`: the Vercel organization ID.
+   - `VERCEL_PROJECT_ID`: the Vercel project ID.
+3. In Vercel project settings, add the production `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `APP_URL` environment variables.
 4. Add `<APP_URL>/auth` to the allowed Supabase Auth redirect URLs.
-5. Run `npm run verify`.
+5. Disable Vercel's automatic Git deployment for this project so GitHub Actions is the single deployment authority.
+
+After this setup, push to `main`. GitHub Actions builds and tests the application first, then runs `vercel deploy --prod` only when that job succeeds.
 
 ## Important Implementation Notes
 
