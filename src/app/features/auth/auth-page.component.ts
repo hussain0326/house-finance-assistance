@@ -9,7 +9,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AuthService, STRONG_PASSWORD_PATTERN, SUPPORTED_CURRENCIES } from '../../core/auth/auth.service';
+import {
+  AuthService,
+  DEMO_ACCOUNT_EMAIL,
+  DEMO_ACCOUNT_PASSWORD,
+  STRONG_PASSWORD_PATTERN,
+  SUPPORTED_CURRENCIES
+} from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-auth-page',
@@ -91,6 +97,22 @@ export class AuthPageComponent {
     }
 
     void this.checkConnection();
+  }
+
+  async signInWithDemoAccount(): Promise<void> {
+    this.feedbackSignal.set(null);
+    this.isSubmittingSignal.set(true);
+
+    const result = await this.authService.signIn(DEMO_ACCOUNT_EMAIL, DEMO_ACCOUNT_PASSWORD);
+
+    this.isSubmittingSignal.set(false);
+
+    if (result.error) {
+      this.feedbackSignal.set(result.error);
+      return;
+    }
+
+    await this.router.navigate(['/app/dashboard']);
   }
 
   toggleMode(): void {

@@ -60,6 +60,12 @@ export const STRONG_PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-
 export const STRONG_PASSWORD_MESSAGE =
   'Use at least 8 characters with uppercase, lowercase, a number, and a symbol.';
 
+// Public, shared account for recruiters/reviewers to try the app without signing up.
+export const DEMO_ACCOUNT_EMAIL = 'demo@homefinance.app';
+export const DEMO_ACCOUNT_PASSWORD = 'HomeFinanceDemo1!';
+const DEMO_ACCOUNT_RESTRICTED_MESSAGE =
+  'This is a shared demo account, so password and profile changes are disabled. Create your own account to save changes.';
+
 const PASSWORD_RESET_COOLDOWN_MS = 60_000;
 const PASSWORD_RESET_RATE_LIMIT_MESSAGE =
   'A reset email was recently requested. Please wait one minute before trying again.';
@@ -86,6 +92,10 @@ export class AuthService {
 
   get isAuthenticated(): boolean {
     return !!this.sessionSignal();
+  }
+
+  get isDemoAccount(): boolean {
+    return this.sessionSignal()?.user?.email?.toLowerCase() === DEMO_ACCOUNT_EMAIL;
   }
 
   async signIn(email: string, password: string): Promise<AuthActionResult> {
@@ -153,6 +163,10 @@ export class AuthService {
       return { error: this.getConfigurationError() };
     }
 
+    if (email.trim().toLowerCase() === DEMO_ACCOUNT_EMAIL) {
+      return { error: DEMO_ACCOUNT_RESTRICTED_MESSAGE };
+    }
+
     if (Date.now() < this.passwordResetAvailableAt) {
       return { error: PASSWORD_RESET_RATE_LIMIT_MESSAGE };
     }
@@ -182,6 +196,10 @@ export class AuthService {
       return { error: this.getConfigurationError() };
     }
 
+    if (this.isDemoAccount) {
+      return { error: DEMO_ACCOUNT_RESTRICTED_MESSAGE };
+    }
+
     const { error } = await this.supabaseService.client.auth.updateUser({ password });
     if (error) {
       return { error: this.mapAuthError(error.message) };
@@ -198,6 +216,10 @@ export class AuthService {
   ): Promise<AuthActionResult> {
     if (!this.isConfigurationReady()) {
       return { error: this.getConfigurationError() };
+    }
+
+    if (this.isDemoAccount) {
+      return { error: DEMO_ACCOUNT_RESTRICTED_MESSAGE };
     }
 
     const normalizedCurrency = this.normalizeCurrency(defaultCurrency);

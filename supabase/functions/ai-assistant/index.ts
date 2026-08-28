@@ -1,10 +1,13 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isDemoAccount } from "../_shared/demo-account.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
+
+const DEMO_MESSAGES_PER_HOUR = 10;
 
 const SYSTEM_PROMPT_TEMPLATE = (todayIso: string, targetCurrency: string) => `You are a household finance assistant. Today's date is ${todayIso}. Use this date to resolve relative periods like "this month", "last month", "this year", or "last year" into exact start_date/end_date values (YYYY-MM-DD) when calling tools.
 All tool amounts are converted to the user's default currency (${targetCurrency}). Tool results include display fields such as total_amount_display; use those display fields for money in your final answer. Every monetary amount in your final answer must include the currency code ${targetCurrency}, for example "91.60 ${targetCurrency}". Do not write bare numbers for money. Only mention original receipt currencies if the user explicitly asks about original receipt currencies.
@@ -135,6 +138,28 @@ Deno.serve(async (request) => {
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData.user) {
     return json({ error: "Authentication is required." }, 401);
+  }
+
+  if (isDemoAccount(userData.user.email)) {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { data: conversations } = await supabase
+      .from("ai_conversations")
+      .select("id")
+      .eq("user_id", userData.user.id);
+    const conversationIds = (conversations ?? []).map((row) => row.id);
+
+    const { count } = conversationIds.length
+      ? await supabase
+          .from("ai_messages")
+          .select("id", { count: "exact", head: true })
+          .eq("role", "user")
+          .gte("created_at", oneHourAgo)
+          .in("conversation_id", conversationIds)
+      : { count: 0 };
+
+    if ((count ?? 0) >= DEMO_MESSAGES_PER_HOUR) {
+      return json({ error: "The demo account has reached its message limit for this hour. Please try again later." }, 429);
+    }
   }
 
   const { message, conversationId } = await request.json();

@@ -1,10 +1,13 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isDemoAccount } from "../_shared/demo-account.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
+
+const DEMO_RECEIPT_SCANS_PER_HOUR = 5;
 
 type ExtractedReceipt = {
   merchant: string | null;
@@ -265,6 +268,19 @@ Deno.serve(async (request) => {
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData.user) {
     return json({ error: "Authentication is required." }, 401);
+  }
+
+  if (isDemoAccount(userData.user.email)) {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count } = await supabase
+      .from("receipts")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userData.user.id)
+      .gte("created_at", oneHourAgo);
+
+    if ((count ?? 0) >= DEMO_RECEIPT_SCANS_PER_HOUR) {
+      return json({ error: "The demo account has reached its scan limit for this hour. Please try again later." }, 429);
+    }
   }
 
   const { data: receipt, error: receiptError } = await supabase

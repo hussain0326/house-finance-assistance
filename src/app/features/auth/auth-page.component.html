@@ -99,6 +99,19 @@
               Forgot password?
             </button>
           }
+
+          @if (isSignInMode() && !isForgotPassword() && !isPasswordRecovery()) {
+            <button
+              mat-stroked-button
+              type="button"
+              class="!h-12"
+              [disabled]="isSubmitting()"
+              (click)="signInWithDemoAccount()"
+              aria-label="Sign in with demo account"
+            >
+              Try the Demo Account
+            </button>
+          }
         </form>
       </mat-card-content>
 

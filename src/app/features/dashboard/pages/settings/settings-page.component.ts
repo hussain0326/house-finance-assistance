@@ -33,6 +33,7 @@ export class SettingsPageComponent {
   readonly passwordFeedback = signal<string | null>(null);
   readonly currencies = SUPPORTED_CURRENCIES;
   readonly profile = this.authService.getProfile();
+  readonly isDemoAccount = this.authService.isDemoAccount;
   readonly form = this.formBuilder.nonNullable.group({
     firstName: [this.profile.firstName, [Validators.required, Validators.maxLength(60)]],
     lastName: [this.profile.lastName, [Validators.required, Validators.maxLength(60)]],

@@ -50,6 +50,12 @@ flowchart LR
 
 For implementation detail, see [docs/architecture.md](docs/architecture.md).
 
+## Demo
+
+Sign in instantly without creating an account: open the app and select **Try the Demo Account** on the sign-in screen. It signs you in as an empty account (`demo@homefinance.app`) scoped by Row Level Security, so feel free to upload a receipt and explore freely — nothing you do affects other users' data.
+
+> Setting this up in your own Supabase project: create an Auth user with the email/password defined in [auth-page.component.ts](src/app/features/auth/auth-page.component.ts) (Supabase Dashboard → Authentication → Users → Add user, with "Auto Confirm User" enabled), or update those constants to your own demo credentials.
+
 ## Features
 
 - Email sign-up, sign-in, password reset, and user preferences.
