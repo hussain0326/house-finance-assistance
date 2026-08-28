@@ -27,7 +27,7 @@ jobs:
 
       - name: Run quality checks
         env:
-          SUPABASE_URL: https://example.supabase.co
-          SUPABASE_ANON_KEY: public-anon-key
+          SUPABASE_URL: https://ci-project.supabase.co
+          SUPABASE_ANON_KEY: ci-publishable-key
           APP_URL: http://localhost:4200
         run: npm run verify
