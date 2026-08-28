@@ -162,20 +162,16 @@ supabase/
 
 ## Deployment
 
-Vercel is configured to build with `npm run build` and serve `dist/house-finance-assistance/browser`, including an SPA rewrite. GitHub Actions deploys only after `npm run verify` passes on a push to `main`; pull requests run verification only.
+Vercel is configured to build with `npm run build` and serve `dist/house-finance-assistance/browser`, including an SPA rewrite. Its Git integration creates a production deployment when changes are pushed to the configured production branch and preview deployments for pull requests.
 
-### One-time GitHub and Vercel setup
+### One-time Vercel setup
 
-1. In Vercel, link the project once with `vercel link`, then copy the organization and project IDs from `.vercel/project.json`.
-2. In GitHub repository settings, add these **Actions secrets**:
-   - `VERCEL_TOKEN`: a Vercel token with access to this project.
-   - `VERCEL_ORG_ID`: the Vercel organization ID.
-   - `VERCEL_PROJECT_ID`: the Vercel project ID.
-3. In Vercel project settings, add the production `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `APP_URL` environment variables.
-4. Add `<APP_URL>/auth` to the allowed Supabase Auth redirect URLs.
-5. Disable Vercel's automatic Git deployment for this project so GitHub Actions is the single deployment authority.
+1. Connect the GitHub repository to the Vercel project and set `main` as the production branch.
+2. In Vercel project settings, add the production `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `APP_URL` environment variables.
+3. Add `<APP_URL>/auth` to the allowed Supabase Auth redirect URLs.
+4. Push to `main` to trigger a Vercel production deployment.
 
-After this setup, push to `main`. GitHub Actions builds and tests the application first, then runs `vercel deploy --prod` only when that job succeeds.
+GitHub Actions independently runs `npm run verify` for pull requests and pushes to `main`. It reports build and test health, while Vercel remains responsible for deployment.
 
 ## Important Implementation Notes
 
