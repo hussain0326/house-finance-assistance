@@ -4,9 +4,6 @@ Home Finance is a full-stack personal-finance progressive web app. It helps peop
 
 Built as a portfolio project, it demonstrates product-focused frontend development, serverless backend integration, AI-assisted workflows, secure data handling, and automated quality checks.
 
-> **Scope:** Home Finance is a technical showcase, not financial advice. Configure your own Supabase project and OpenAI key before processing real receipts.
-
-
 ### The problem
 
 Receipt-based expense tracking is tedious: data must be captured, categorised, corrected, and made useful across different currencies. Generic chat interfaces also risk producing answers that are not backed by a user's actual financial data.
@@ -53,8 +50,6 @@ For implementation detail, see [docs/architecture.md](docs/architecture.md).
 ## Demo
 
 Sign in instantly without creating an account: open the app and select **Try the Demo Account** on the sign-in screen. It signs you in as an empty account (`demo@homefinance.app`) scoped by Row Level Security, so feel free to upload a receipt and explore freely — nothing you do affects other users' data.
-
-> Setting this up in your own Supabase project: create an Auth user with the email/password defined in [auth-page.component.ts](src/app/features/auth/auth-page.component.ts) (Supabase Dashboard → Authentication → Users → Add user, with "Auto Confirm User" enabled), or update those constants to your own demo credentials.
 
 ## Features
 

@@ -27,17 +27,35 @@ const appUrl = readOptionalEnv('APP_URL', [
   'NEXT_PUBLIC_APP_URL',
   'VERCEL_PROJECT_PRODUCTION_URL'
 ]);
+const demoAccountEmail =
+  readOptionalEnv('DEMO_ACCOUNT_EMAIL', [
+    'PUBLIC_DEMO_ACCOUNT_EMAIL',
+    'VITE_DEMO_ACCOUNT_EMAIL',
+    'NG_APP_DEMO_ACCOUNT_EMAIL',
+    'NEXT_PUBLIC_DEMO_ACCOUNT_EMAIL'
+  ]) || 'demo@homefinance.app';
+const demoAccountPassword =
+  readOptionalEnv('DEMO_ACCOUNT_PASSWORD', [
+    'PUBLIC_DEMO_ACCOUNT_PASSWORD',
+    'VITE_DEMO_ACCOUNT_PASSWORD',
+    'NG_APP_DEMO_ACCOUNT_PASSWORD',
+    'NEXT_PUBLIC_DEMO_ACCOUNT_PASSWORD'
+  ]) || 'HomeFinanceDemo1!';
 
 writeEnvironmentFile('src/environments/environment.generated.ts', false, {
   supabaseUrl,
   supabaseAnonKey,
-  appUrl: readOptionalEnv('LOCAL_APP_URL')
+  appUrl: readOptionalEnv('LOCAL_APP_URL'),
+  demoAccountEmail,
+  demoAccountPassword
 });
 
 writeEnvironmentFile('src/environments/environment.generated.prod.ts', true, {
   supabaseUrl,
   supabaseAnonKey,
-  appUrl
+  appUrl,
+  demoAccountEmail,
+  demoAccountPassword
 });
 
 function loadLocalEnv(filePath) {
@@ -95,7 +113,9 @@ function writeEnvironmentFile(relativePath, production, values) {
     `  production: ${production},\n` +
     `  supabaseUrl: ${JSON.stringify(values.supabaseUrl)},\n` +
     `  supabaseAnonKey: ${JSON.stringify(values.supabaseAnonKey)},\n` +
-    `  appUrl: ${JSON.stringify(values.appUrl)}\n` +
+    `  appUrl: ${JSON.stringify(values.appUrl)},\n` +
+    `  demoAccountEmail: ${JSON.stringify(values.demoAccountEmail)},\n` +
+    `  demoAccountPassword: ${JSON.stringify(values.demoAccountPassword)}\n` +
     `};\n`;
 
   writeFileSync(resolve(rootDir, relativePath), content);

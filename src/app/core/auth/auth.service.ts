@@ -61,8 +61,8 @@ export const STRONG_PASSWORD_MESSAGE =
   'Use at least 8 characters with uppercase, lowercase, a number, and a symbol.';
 
 // Public, shared account to try the app without signing up.
-export const DEMO_ACCOUNT_EMAIL = 'demo@homefinance.app';
-export const DEMO_ACCOUNT_PASSWORD = 'HomeFinanceDemo1!';
+export const DEMO_ACCOUNT_EMAIL = environment.demoAccountEmail;
+export const DEMO_ACCOUNT_PASSWORD = environment.demoAccountPassword;
 const DEMO_ACCOUNT_RESTRICTED_MESSAGE =
   'This is a shared demo account, so password and profile changes are disabled. Create your own account to save changes.';
 
@@ -95,7 +95,7 @@ export class AuthService {
   }
 
   get isDemoAccount(): boolean {
-    return this.sessionSignal()?.user?.email?.toLowerCase() === DEMO_ACCOUNT_EMAIL;
+    return this.sessionSignal()?.user?.email?.toLowerCase() === DEMO_ACCOUNT_EMAIL.toLowerCase();
   }
 
   async signIn(email: string, password: string): Promise<AuthActionResult> {
@@ -163,7 +163,7 @@ export class AuthService {
       return { error: this.getConfigurationError() };
     }
 
-    if (email.trim().toLowerCase() === DEMO_ACCOUNT_EMAIL) {
+    if (email.trim().toLowerCase() === DEMO_ACCOUNT_EMAIL.toLowerCase()) {
       return { error: DEMO_ACCOUNT_RESTRICTED_MESSAGE };
     }
 

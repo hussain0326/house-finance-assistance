@@ -82,6 +82,7 @@ export class ReceiptHistoryPageComponent {
     this.filterForm = this.formBuilder.group({
       search: [''],
       categoryId: [''],
+      countryCode: [''],
       year: [''],
       month: ['']
     });
@@ -97,7 +98,7 @@ export class ReceiptHistoryPageComponent {
   }
 
   async resetFilters(): Promise<void> {
-    this.filterForm.reset({ search: '', categoryId: '', year: '', month: '' });
+    this.filterForm.reset({ search: '', categoryId: '', countryCode: '', year: '', month: '' });
     this.pageIndex.set(0);
     await this.loadPage();
   }
@@ -314,6 +315,7 @@ export class ReceiptHistoryPageComponent {
       pageSize: this.pageSize(),
       search: filters.search ?? undefined,
       categoryId: filters.categoryId ?? undefined,
+      countryCode: filters.countryCode ?? undefined,
       startDate,
       endDate
     });

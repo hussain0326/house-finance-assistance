@@ -34,16 +34,29 @@ describe('ReceiptHistoryPageComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should initialize filter form with merchant, category, year, and month controls', () => {
+  it('should initialize filter form with merchant, category, country, year, and month controls', () => {
     const fixture = TestBed.createComponent(ReceiptHistoryPageComponent);
     const component = fixture.componentInstance;
     const controlKeys = Object.keys(component.filterForm.controls);
 
     expect(controlKeys).toContain('search');
     expect(controlKeys).toContain('categoryId');
+    expect(controlKeys).toContain('countryCode');
     expect(controlKeys).toContain('year');
     expect(controlKeys).toContain('month');
     expect(controlKeys).not.toContain('status');
+  });
+
+  it('should pass countryCode filter to receiptService.getReceiptHistory when applied', async () => {
+    const fixture = TestBed.createComponent(ReceiptHistoryPageComponent);
+    const component = fixture.componentInstance;
+    component.filterForm.controls.countryCode.setValue('DK');
+
+    await component.applyFilters();
+
+    expect(receiptService.getReceiptHistory).toHaveBeenCalledWith(
+      jasmine.objectContaining({ countryCode: 'DK' })
+    );
   });
 
   it('should delete selected receipts after confirmation', async () => {

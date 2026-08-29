@@ -39,7 +39,7 @@ export class DashboardShellComponent {
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', route: '/app/dashboard', icon: 'space_dashboard' },
     { label: 'Receipt', route: '/app/receipt', icon: 'receipt_long' },
-    { label: 'History', route: '/app/history', icon: 'history' },
+    { label: 'Receipt History', route: '/app/history', icon: 'history' },
     { label: 'Analytics', route: '/app/analytics', icon: 'monitoring' },
     { label: 'AI Assistant', route: '/app/assistant', icon: 'smart_toy' },
     { label: 'Settings', route: '/app/settings', icon: 'settings' }
@@ -68,7 +68,7 @@ export class DashboardShellComponent {
       case '/app/receipt':
         return 'Receipt Upload';
       case '/app/history':
-        return 'Expense History';
+        return 'Receipt History';
       case '/app/analytics':
         return 'Spending Analytics';
       case '/app/assistant':
