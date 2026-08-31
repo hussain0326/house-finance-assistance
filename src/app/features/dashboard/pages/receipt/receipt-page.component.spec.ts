@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ReceiptPageComponent } from './receipt-page.component';
+import { MediaService } from '../../../../core/media/media.service';
 import { ReceiptService } from '../../services/receipt.service';
 
 describe('ReceiptPageComponent', () => {
   let receiptService: any;
+  let mediaService: any;
 
   beforeEach(async () => {
     receiptService = {
@@ -18,10 +20,18 @@ describe('ReceiptPageComponent', () => {
         message: 'processing'
       })
     };
+    mediaService = {
+      isNativePlatform: false,
+      captureReceipt: jasmine.createSpy('captureReceipt').and.resolveTo(null)
+    };
 
     await TestBed.configureTestingModule({
       imports: [ReceiptPageComponent],
-      providers: [provideRouter([]), { provide: ReceiptService, useValue: receiptService }]
+      providers: [
+        provideRouter([]),
+        { provide: ReceiptService, useValue: receiptService },
+        { provide: MediaService, useValue: mediaService }
+      ]
     }).compileComponents();
   });
 
@@ -49,6 +59,18 @@ describe('ReceiptPageComponent', () => {
 
     expect(component.ocrStatus()).toBe('complete');
     expect(component.reviewMessage()).toContain('Receipt History');
+  });
+
+  it('should use Capacitor camera capture on a native platform', async () => {
+    mediaService.isNativePlatform = true;
+    const file = new File(['receipt'], 'receipt.jpg', { type: 'image/jpeg' });
+    mediaService.captureReceipt.and.resolveTo(file);
+    const fixture = TestBed.createComponent(ReceiptPageComponent);
+
+    await fixture.componentInstance.scanWithCamera();
+
+    expect(mediaService.captureReceipt).toHaveBeenCalled();
+    expect(fixture.componentInstance.selectedFile()).toBe(file);
   });
 
 });

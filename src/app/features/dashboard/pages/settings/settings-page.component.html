@@ -1,95 +1,52 @@
 <section class="settings-layout">
-  <mat-card appearance="outlined" class="settings-card">
-    <mat-card-header>
-      <mat-icon mat-card-avatar class="settings-avatar profile-avatar">manage_accounts</mat-icon>
-      <mat-card-title>Profile</mat-card-title>
-      <mat-card-subtitle>{{ profile.email || 'Account details' }}</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+  <ion-card class="settings-card"><ion-card-header class="settings-card-header">
+      <div class="settings-avatar profile-avatar"><ion-icon name="person-circle-outline"></ion-icon></div>
+      <ion-card-title>Profile</ion-card-title><ion-card-subtitle>{{ profile.email || 'Account details' }}</ion-card-subtitle>
+    </ion-card-header><ion-card-content class="settings-card-content">
       @if (isDemoAccount) {
         <p class="settings-help-text">This is a shared demo account, so profile changes are disabled.</p>
       }
       <form class="settings-form" [formGroup]="form" (ngSubmit)="saveProfile()">
-        <mat-form-field appearance="outline">
-          <mat-label>First name</mat-label>
-          <input matInput formControlName="firstName" autocomplete="given-name" />
-          @if (form.controls.firstName.hasError('required')) {
-            <mat-error>First name is required.</mat-error>
-          }
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Last name</mat-label>
-          <input matInput formControlName="lastName" autocomplete="family-name" />
-          @if (form.controls.lastName.hasError('required')) {
-            <mat-error>Last name is required.</mat-error>
-          }
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Default currency</mat-label>
-          <mat-select formControlName="defaultCurrency" aria-label="Default currency">
+        <div class="profile-fields">
+        <ion-input label="First name" labelPlacement="stacked" fill="outline" formControlName="firstName" autocomplete="given-name"></ion-input>
+        <ion-input label="Last name" labelPlacement="stacked" fill="outline" formControlName="lastName" autocomplete="family-name"></ion-input>
+        </div>
+        <ion-select label="Default currency" labelPlacement="stacked" fill="outline" formControlName="defaultCurrency" aria-label="Default currency">
             @for (currency of currencies; track currency) {
-              <mat-option [value]="currency">{{ currency }}</mat-option>
+              <ion-select-option [value]="currency">{{ currency }}</ion-select-option>
             }
-          </mat-select>
-          @if (form.controls.defaultCurrency.hasError('required')) {
-            <mat-error>Default currency is required.</mat-error>
-          }
-        </mat-form-field>
+        </ion-select>
         <p class="settings-help-text">
           Dashboard, analytics, and receipt history convert totals to this currency using the latest stored exchange rates.
         </p>
         <p class="settings-feedback" aria-live="polite">{{ feedback() }}</p>
-        <button mat-flat-button color="primary" type="submit" [disabled]="isSaving() || isDemoAccount">
+        <ion-button type="submit" [disabled]="isSaving() || isDemoAccount">
           Save profile
-        </button>
+        </ion-button>
       </form>
-    </mat-card-content>
-  </mat-card>
+    </ion-card-content></ion-card>
 
-  <mat-card appearance="outlined" class="settings-card">
-    <mat-card-header>
-      <mat-icon mat-card-avatar class="settings-avatar security-avatar">lock</mat-icon>
-      <mat-card-title>Account security</mat-card-title>
-      <mat-card-subtitle>Choose a new password to protect your account.</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+  <ion-card class="settings-card"><ion-card-header class="settings-card-header">
+      <div class="settings-avatar security-avatar"><ion-icon name="lock-closed-outline"></ion-icon></div>
+      <ion-card-title>Account security</ion-card-title><ion-card-subtitle>Choose a new password to protect your account.</ion-card-subtitle>
+    </ion-card-header><ion-card-content class="settings-card-content">
       @if (isDemoAccount) {
         <p class="settings-help-text">This is a shared demo account, so password changes are disabled.</p>
       }
       <form class="settings-form" [formGroup]="passwordForm" (ngSubmit)="changePassword()">
-        <mat-form-field appearance="outline">
-          <mat-label>New password</mat-label>
-          <input matInput formControlName="password" autocomplete="new-password" type="password" />
-          @if (passwordForm.controls.password.hasError('required')) {
-            <mat-error>New password is required.</mat-error>
-          } @else if (passwordForm.controls.password.hasError('pattern')) {
-            <mat-error>Use 8+ characters with uppercase, lowercase, a number, and a symbol.</mat-error>
-          }
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Confirm new password</mat-label>
-          <input matInput formControlName="confirmPassword" autocomplete="new-password" type="password" />
-          @if (passwordForm.controls.confirmPassword.hasError('required')) {
-            <mat-error>Please confirm your new password.</mat-error>
-          } @else if (passwordForm.controls.confirmPassword.hasError('passwordMismatch')) {
-            <mat-error>Passwords do not match.</mat-error>
-          }
-        </mat-form-field>
+        <ion-input label="New password" labelPlacement="stacked" fill="outline" formControlName="password" autocomplete="new-password" type="password"></ion-input>
+        <ion-input label="Confirm new password" labelPlacement="stacked" fill="outline" formControlName="confirmPassword" autocomplete="new-password" type="password"></ion-input>
         <p class="settings-feedback" aria-live="polite">{{ passwordFeedback() }}</p>
-        <button mat-flat-button color="primary" type="submit" [disabled]="isChangingPassword() || isDemoAccount">
+        <ion-button type="submit" [disabled]="isChangingPassword() || isDemoAccount">
           Update password
-        </button>
+        </ion-button>
       </form>
-    </mat-card-content>
-  </mat-card>
+    </ion-card-content></ion-card>
 
-  <mat-card appearance="outlined" class="settings-card help-card">
-    <mat-card-header>
-      <mat-icon mat-card-avatar class="settings-avatar help-avatar">support_agent</mat-icon>
-      <mat-card-title>Help & Support</mat-card-title>
-      <mat-card-subtitle>Quick answers for common account and receipt tasks.</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+  <ion-card class="settings-card help-card"><ion-card-header class="settings-card-header">
+      <div class="settings-avatar help-avatar"><ion-icon name="help-circle-outline"></ion-icon></div>
+      <ion-card-title>Help & Support</ion-card-title><ion-card-subtitle>Quick answers for common account and receipt tasks.</ion-card-subtitle>
+    </ion-card-header><ion-card-content class="settings-card-content">
       <div class="help-list">
         <section>
           <h3>Receipt scanning</h3>
@@ -108,6 +65,5 @@
           <p>Use Account security while signed in, or use Forgot password on the sign-in page if you cannot access the account.</p>
         </section>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </ion-card-content></ion-card>
 </section>

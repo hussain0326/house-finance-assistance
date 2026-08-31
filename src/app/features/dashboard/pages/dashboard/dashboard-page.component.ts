@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
+import { IonCard, IonCardContent, IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { calendarOutline, homeOutline, receiptOutline, repeatOutline, statsChartOutline, timeOutline, trendingUpOutline } from 'ionicons/icons';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import { EChartsCoreOption } from 'echarts/core';
 import { ReceiptService } from '../../services/receipt.service';
@@ -16,7 +17,7 @@ type Expense = {
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [MatCardModule, CurrencyPipe, DatePipe, NgxEchartsDirective, MatIconModule],
+  imports: [IonCard, IonCardContent, IonIcon, CurrencyPipe, DatePipe, NgxEchartsDirective],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -65,6 +66,7 @@ export class DashboardPageComponent {
     private readonly receiptService: ReceiptService,
     private readonly authService: AuthService
   ) {
+    addIcons({ calendarOutline, homeOutline, receiptOutline, repeatOutline, statsChartOutline, timeOutline, trendingUpOutline });
     void this.loadDashboard();
   }
 

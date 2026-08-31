@@ -1,20 +1,21 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { IonButton, IonCard, IonCardContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { RouterLink } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { cameraOutline, checkmarkCircleOutline, cloudUploadOutline, documentAttachOutline, receiptOutline, timeOutline } from 'ionicons/icons';
+import { MediaService } from '../../../../core/media/media.service';
 import { ReceiptService } from '../../services/receipt.service';
 
 @Component({
   selector: 'app-receipt-page',
   imports: [
     CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatIconModule,
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonIcon,
+    IonSpinner,
     RouterLink
   ],
   templateUrl: './receipt-page.component.html',
@@ -22,6 +23,8 @@ import { ReceiptService } from '../../services/receipt.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReceiptPageComponent {
+  @ViewChild('cameraInput') private readonly cameraInput?: ElementRef<HTMLInputElement>;
+
   readonly selectedFile = signal<File | null>(null);
   readonly isUploading = signal(false);
   readonly uploadMessage = signal('');
@@ -29,7 +32,23 @@ export class ReceiptPageComponent {
   readonly reviewMessage = signal('');
   readonly ocrStatus = signal<'idle' | 'processing' | 'complete' | 'failed'>('idle');
 
-  constructor(private readonly receiptService: ReceiptService) {}
+  constructor(
+    private readonly receiptService: ReceiptService,
+    private readonly mediaService: MediaService
+  ) {
+    addIcons({
+      cameraOutline,
+      checkmarkCircleOutline,
+      cloudUploadOutline,
+      documentAttachOutline,
+      receiptOutline,
+      timeOutline
+    });
+  }
+
+  get isNativePlatform(): boolean {
+    return this.mediaService.isNativePlatform;
+  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -38,6 +57,18 @@ export class ReceiptPageComponent {
     this.uploadMessage.set('');
     this.reviewMessage.set('');
     this.ocrStatus.set('idle');
+  }
+
+  async scanWithCamera(): Promise<void> {
+    if (!this.isNativePlatform) {
+      this.cameraInput?.nativeElement.click();
+      return;
+    }
+
+    const file = await this.mediaService.captureReceipt();
+    if (file) {
+      this.setSelectedFile(file);
+    }
   }
 
   async uploadSelected(): Promise<void> {
@@ -75,4 +106,10 @@ export class ReceiptPageComponent {
     }
   }
 
+  private setSelectedFile(file: File): void {
+    this.selectedFile.set(file);
+    this.uploadMessage.set('');
+    this.reviewMessage.set('');
+    this.ocrStatus.set('idle');
+  }
 }

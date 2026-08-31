@@ -1,8 +1,8 @@
 .elevated-card {
-  border-radius: 12px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .dashboard-intro,
@@ -26,7 +26,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 
 .intro-icon,
@@ -41,19 +41,19 @@
 .intro-icon,
 .metric-icon--month,
 .section-icon--receipts {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--color-primary-bg-strong);
+  color: var(--color-primary-text);
 }
 
 .metric-icon--annual,
 .section-icon--trend {
-  background: #ccfbf1;
-  color: #0f766e;
+  background: var(--color-secondary-bg);
+  color: var(--color-secondary);
 }
 
 .metric-icon--average {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
 }
 
 .summary-card mat-card-content {
@@ -62,14 +62,14 @@
 
 .summary-label {
   gap: 8px;
-  color: #475569;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
   font-weight: 600;
 }
 
 .summary-value {
   margin: 14px 0 0;
-  color: #0f172a;
+  color: var(--color-text);
   font-size: 1.875rem;
   font-weight: 700;
   line-height: 1.1;
@@ -82,9 +82,9 @@
 }
 
 .expense-row {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
   padding: 12px;
 }
 
@@ -96,8 +96,8 @@
 .expense-icon {
   width: 32px;
   height: 32px;
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
 }
 
 .expense-icon .mat-icon {
@@ -110,14 +110,14 @@
   justify-content: center;
   gap: 8px;
   min-height: 144px;
-  border: 1px dashed #cbd5e1;
-  border-radius: 8px;
-  color: #64748b;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
 }
 
 .chart-host {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #f8fafc;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-alt);
 }

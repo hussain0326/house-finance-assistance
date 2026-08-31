@@ -1,23 +1,24 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonIcon, IonInput, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { helpCircleOutline, lockClosedOutline, personCircleOutline } from 'ionicons/icons';
 import { AuthService, STRONG_PASSWORD_PATTERN, SUPPORTED_CURRENCIES } from '../../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-settings-page',
   imports: [
     ReactiveFormsModule,
-    MatButtonModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatSelectModule
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardSubtitle,
+    IonCardTitle,
+    IonIcon,
+    IonInput,
+    IonSelect,
+    IonSelectOption
   ],
   templateUrl: './settings-page.component.html',
   styleUrl: './settings-page.component.scss',
@@ -43,6 +44,10 @@ export class SettingsPageComponent {
     password: ['', [Validators.required, Validators.pattern(STRONG_PASSWORD_PATTERN)]],
     confirmPassword: ['', [Validators.required]]
   });
+
+  constructor() {
+    addIcons({ helpCircleOutline, lockClosedOutline, personCircleOutline });
+  }
 
   async saveProfile(): Promise<void> {
     if (this.form.invalid) {

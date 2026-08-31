@@ -1,34 +1,64 @@
-.layout-shell {
-  background: #f8fafc;
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-surface-alt);
 }
 
-.layout-side {
+.desktop-sidebar {
+  width: 272px;
+  flex: 0 0 272px;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.layout-shell {
   display: flex;
+  min-width: 0;
+  min-height: 100vh;
+  flex: 1;
   flex-direction: column;
-  border-right: 1px solid #e2e8f0;
-  background: #ffffff;
+  background: var(--color-surface-alt);
+}
+
+ion-menu ion-toolbar {
+  --background: var(--color-surface);
+  --border-color: var(--color-border);
+}
+
+ion-menu {
+  --width: 272px;
 }
 
 .brand-block {
   display: grid;
-  grid-template-columns: 44px 1fr;
-  gap: 10px;
-  align-items: center;
   min-height: 92px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-}
-
-.brand-mark {
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
+  grid-template-columns: 44px 1fr;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
+  padding: 16px;
 }
 
 .brand-mark img {
+  display: block;
   width: 44px;
   height: 44px;
+}
+
+.brand-block h1,
+.brand-block p {
+  margin: 0;
+}
+
+.brand-block h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.brand-block p,
+.toolbar-subheading,
+.footer-copy {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
 }
 
 .nav-list {
@@ -36,174 +66,161 @@
 }
 
 .nav-item {
-  min-height: 48px;
-  border: 1px solid transparent;
-  border-radius: 8px;
+  --background: transparent;
+  --background-hover: var(--color-primary-bg);
+  --color: var(--color-text-secondary);
+  --color-hover: var(--color-primary-text);
+  --border-radius: var(--radius-sm);
+  --min-height: 52px;
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
   margin-bottom: 4px;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.nav-item .mat-icon {
-  margin-right: 10px;
-  color: #475569;
-  transition: color 0.15s ease;
+.nav-item::part(native) {
+  align-items: center;
 }
 
-.nav-item:hover {
-  background: #eff6ff;
-  color: #1d4ed8;
+.nav-item ion-icon {
+  width: 22px;
+  height: 22px;
+  margin-inline-end: 12px;
+  color: currentColor;
+  font-size: 22px;
 }
 
-.nav-item:hover .mat-icon {
-  color: #1d4ed8;
+.nav-item ion-label {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
 }
 
-.nav-item:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-}
-
-.active-link {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  box-shadow: inset 3px 0 0 #2563eb;
-}
-
-.active-link .mat-icon,
-.active-link span {
-  color: #1e40af;
+.nav-item.active-link {
+  --background: var(--color-primary-bg);
+  --color: var(--color-primary-text-strong);
+  box-shadow: inset 3px 0 0 var(--color-primary);
   font-weight: 600;
 }
 
 .topbar {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  --background: var(--color-surface);
+  --border-color: var(--color-border);
+  --min-height: 68px;
 }
 
 .toolbar-title-wrap {
-  display: inline-flex;
+  display: flex;
+  min-width: 0;
   align-items: center;
   gap: 12px;
-  color: #1e293b;
+  padding-block: 8px;
 }
 
 .toolbar-page-icon {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 8px;
-  background: #dbeafe;
-  color: #1d4ed8;
+  flex: 0 0 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-bg-strong);
+  color: var(--color-primary-text);
 }
 
 .toolbar-copy {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
+  min-width: 0;
 }
 
 .toolbar-heading {
-  font-size: 16px;
+  display: block;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 1rem;
+  color: var(--color-text);
   font-weight: 700;
-  color: #0f172a;
-}
-
-.toolbar-subheading {
-  font-size: 12px;
-  color: #475569;
+  line-height: 1.25rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-signout {
-  color: #475569;
-  border-radius: 8px;
+  --color: var(--color-text-secondary);
 }
 
-.user-signout:hover {
-  background: #f1f5f9;
-  color: #1d4ed8;
+.main-content {
+  flex: 1;
 }
 
 .content-wrapper {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 1.75rem;
 }
 
 .content-surface {
-  min-height: calc(100vh - 210px);
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  min-height: calc(100vh - 190px);
   padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .app-footer {
-  border-top: 1px solid #e2e8f0;
-  background: #ffffff;
-  font-size: 12px;
   padding: 10px 16px;
-  margin-bottom: 0;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  text-align: center;
 }
 
-.footer-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: center;
-}
-
-.footer-copy {
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.active-mobile {
-  background: rgba(30, 64, 175, 0.14);
-  color: #1e3a8a;
-}
-
-.mobile-nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-}
-
-.mobile-nav-item .mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
+.bottom-nav {
+  display: none;
 }
 
 @media (max-width: 767px) {
-  .layout-side {
+  .desktop-sidebar {
     display: none;
   }
 
-  .toolbar-heading {
-    font-size: 14px;
-  }
-
-  .toolbar-subheading {
-    display: none;
-  }
-
-  .content-surface {
-    min-height: calc(100vh - 184px);
-    border-radius: 14px;
+  .content-wrapper {
     padding: 0.75rem;
   }
 
-  .app-footer {
-    margin-bottom: 0;
-    padding: 10px 12px;
+  .content-surface {
+    min-height: calc(100vh - 180px);
+    padding: 0.75rem;
   }
 
-  .footer-inner {
-    justify-content: center;
+  .toolbar-subheading,
+  .app-footer {
+    display: none;
+  }
+
+  .bottom-nav {
+    display: flex;
+  }
+
+  .bottom-nav ion-label {
+    font-size: 0.625rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-menu-button {
+    display: none;
+  }
+
+  .toolbar-title-wrap {
+    padding-inline: 24px;
+  }
+
+  .mobile-menu {
+    display: none;
+  }
+
+  .bottom-nav {
+    display: none;
   }
 }

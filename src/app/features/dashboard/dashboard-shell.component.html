@@ -1,69 +1,87 @@
-<mat-sidenav-container class="layout-shell min-h-screen">
-  <mat-sidenav mode="side" opened class="layout-side w-64" [fixedInViewport]="isMobile()" [opened]="!isMobile()">
-    <div class="brand-block px-4 py-5">
-      <div class="brand-mark">
-        <img src="favicon.svg" alt="" />
-      </div>
+<ion-menu contentId="main-content" type="overlay" class="mobile-menu">
+    <ion-header>
+      <ion-toolbar>
+        <div class="brand-block">
+          <div class="brand-mark"><img src="favicon.svg" alt="" /></div>
+          <div>
+            <h1>Home Finance</h1>
+            <p>Personal Budget Assistance</p>
+          </div>
+        </div>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-list class="nav-list" lines="none">
+        @for (item of navItems; track item.route) {
+          <ion-menu-toggle autoHide="true">
+            <ion-item [routerLink]="item.route" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" button detail="false" class="nav-item">
+              <ion-icon slot="start" [name]="item.icon" aria-hidden="true"></ion-icon>
+              <ion-label>{{ item.label }}</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        }
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+<div class="app-layout">
+  <aside class="desktop-sidebar" aria-label="Primary navigation">
+    <div class="brand-block">
+      <div class="brand-mark"><img src="favicon.svg" alt="" /></div>
       <div>
-        <h1 class="text-xl font-semibold tracking-tight">Home Finance</h1>
-        <p class="text-sm text-slate-600">Personal Budget Assistance</p>
+        <h1>Home Finance</h1>
+        <p>Personal Budget Assistance</p>
       </div>
     </div>
-
-    <mat-nav-list class="nav-list">
+    <ion-list class="nav-list" lines="none">
       @for (item of navItems; track item.route) {
-        <a mat-list-item [routerLink]="item.route" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
-          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-          <span matListItemTitle>{{ item.label }}</span>
-        </a>
+        <ion-item [routerLink]="item.route" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" button detail="false" class="nav-item">
+          <ion-icon slot="start" [name]="item.icon" aria-hidden="true"></ion-icon>
+          <ion-label>{{ item.label }}</ion-label>
+        </ion-item>
       }
-    </mat-nav-list>
+    </ion-list>
+  </aside>
 
-  </mat-sidenav>
-
-  <mat-sidenav-content>
-    <mat-toolbar class="topbar sticky top-0 z-30 px-4" color="transparent">
-      <div class="toolbar-title-wrap">
-        <span class="toolbar-page-icon"><mat-icon>{{ currentPageIcon() }}</mat-icon></span>
-        <div class="toolbar-copy">
-          <span class="toolbar-heading">{{ currentPageTitle() }}</span>
-          <span class="toolbar-subheading">{{ currentPageSubtitle() }}</span>
+  <div id="main-content" class="layout-shell">
+    <ion-header>
+      <ion-toolbar class="topbar">
+        <ion-buttons slot="start" class="mobile-menu-button">
+          <ion-menu-button aria-label="Open navigation"></ion-menu-button>
+        </ion-buttons>
+        <div class="toolbar-title-wrap">
+          <span class="toolbar-page-icon"><ion-icon [name]="currentPageIcon()" aria-hidden="true"></ion-icon></span>
+          <div class="toolbar-copy">
+            <span class="toolbar-heading">{{ currentPageTitle() }}</span>
+            <span class="toolbar-subheading">{{ currentPageSubtitle() }}</span>
+          </div>
         </div>
-      </div>
-      <span class="flex-1"></span>
-      <button mat-icon-button class="user-signout" type="button" (click)="signOut()" aria-label="Sign out">
-        <mat-icon>logout</mat-icon>
-      </button>
-    </mat-toolbar>
+        <ion-buttons slot="end">
+          <ion-button fill="clear" class="user-signout" type="button" (click)="signOut()" aria-label="Sign out">
+            <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
 
-    <main class="content-wrapper px-4 pb-16 pt-4 sm:px-6 sm:pt-6">
-      <section class="content-surface">
-        <router-outlet />
-      </section>
-    </main>
-
-    <footer class="app-footer" aria-label="Application footer">
-      <div class="footer-inner">
+    <ion-content class="main-content">
+      <main class="content-wrapper">
+        <section class="content-surface">
+          <router-outlet></router-outlet>
+        </section>
+      </main>
+      <footer class="app-footer" aria-label="Application footer">
         <span class="footer-copy">© {{ currentYear }} Home Finance Assistance</span>
-      </div>
-    </footer>
+      </footer>
+    </ion-content>
 
-    <nav class="bottom-nav fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-2 py-2 backdrop-blur md:hidden" aria-label="Primary navigation">
-      <ul class="grid grid-cols-6 gap-1">
-        @for (item of navItems; track item.route) {
-          <li>
-            <a
-              [routerLink]="item.route"
-              routerLinkActive="active-mobile"
-              [routerLinkActiveOptions]="{ exact: true }"
-              class="mobile-nav-item block rounded-lg px-2 py-2 text-center text-xs font-medium text-slate-600"
-            >
-              <mat-icon>{{ item.icon }}</mat-icon>
-              {{ item.label }}
-            </a>
-          </li>
-        }
-      </ul>
-    </nav>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+    <ion-tab-bar slot="bottom" class="bottom-nav" aria-label="Primary navigation">
+      @for (item of mobileNavItems; track item.route) {
+        <ion-tab-button [routerLink]="item.route" routerLinkActive="active-mobile" [routerLinkActiveOptions]="{ exact: true }" [tab]="item.route">
+          <ion-icon [name]="item.icon" aria-hidden="true"></ion-icon>
+          <ion-label>{{ item.label }}</ion-label>
+        </ion-tab-button>
+      }
+    </ion-tab-bar>
+  </div>
+</div>

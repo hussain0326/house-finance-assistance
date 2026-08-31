@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { Capacitor } from '@capacitor/core';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { SupabaseService } from '../supabase/supabase.service';
 import { environment } from '../../../environments/environment';
@@ -330,6 +331,10 @@ export class AuthService {
   }
 
   private getAuthRedirectUrl(): string {
+    if (Capacitor.isNativePlatform()) {
+      return 'homefinance://auth';
+    }
+
     const configuredAppUrl = (environment.appUrl ?? '').trim().replace(/\/$/, '');
     const origin = configuredAppUrl || (typeof window === 'undefined' ? '' : window.location.origin);
     return `${origin}/auth`;

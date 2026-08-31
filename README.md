@@ -22,7 +22,8 @@ Home Finance provides one connected workflow:
 
 | Capability | Implementation |
 | --- | --- |
-| Responsive product UI | Angular 20 standalone components, signals, Angular Material, Tailwind CSS v4, desktop sidebar, and mobile bottom navigation |
+| Responsive product UI | Angular 20 standalone components, Ionic UI, Angular Material during the remaining page migration, Tailwind CSS v4, desktop sidebar, and mobile bottom navigation |
+| Native delivery | Capacitor projects for Android and iOS, including native receipt camera capture and Supabase callback deep links |
 | Secure identity and data access | Supabase Auth, protected routes, PostgreSQL Row Level Security, and private receipt storage |
 | AI workflow with user control | OpenAI-powered extraction, deterministic fallback rules, and an explicit edit/review step |
 | Accurate money handling | Original values retained, configurable reporting currency, live-rate refresh, and country-aware reporting |
@@ -33,7 +34,8 @@ Home Finance provides one connected workflow:
 
 ```mermaid
 flowchart LR
-  Browser[Angular 20 PWA] --> Auth[Supabase Auth]
+   Browser[Angular 20 PWA / Ionic UI] --> Auth[Supabase Auth]
+   Native[Capacitor Android / iOS] --> Browser
   Browser --> Storage[Private Storage]
   Browser --> ReceiptFn[Receipt Edge Function]
   Browser --> AssistantFn[AI Assistant Edge Function]
@@ -65,11 +67,11 @@ Sign in instantly without creating an account: open the app and select **Try the
 
 | Area | Choice |
 | --- | --- |
-| Client | Angular 20, TypeScript, Angular Material, Tailwind CSS v4 |
+| Client | Angular 20, TypeScript, Ionic Angular, Tailwind CSS v4, and Angular Material during the remaining page migration |
 | Charts | Apache ECharts via `ngx-echarts` |
 | Backend | Supabase Auth, PostgreSQL, Storage, and Edge Functions |
 | AI | OpenAI APIs for receipt extraction and finance assistant responses |
-| Delivery | Progressive Web App service worker and Vercel configuration |
+| Delivery | Angular PWA and Vercel for web; Capacitor for Android and iOS |
 | Testing | Jasmine, Karma, Chrome Headless, and GitHub Actions |
 
 ## Development Setup 
@@ -81,6 +83,8 @@ Sign in instantly without creating an account: open the app and select **Try the
 - A Supabase project
 - Supabase CLI for migrations and Edge Function deployment
 - An OpenAI API key for receipt processing and assistant features
+- Android Studio with the Android SDK for Android builds
+- macOS with Xcode for iOS builds
 
 ### Quick start
 
@@ -137,11 +141,27 @@ Sign in instantly without creating an account: open the app and select **Try the
 
 `npm run verify` is the project quality gate and is executed by [the GitHub Actions workflow](.github/workflows/quality.yml). The current frontend test suite covers application setup, authentication and route guards, Supabase configuration, page components, receipt workflows, and AI assistant success and error states.
 
+### Native mobile builds
+
+The app remains a web PWA and can also be packaged with Capacitor. Both native projects consume the same `dist/house-finance-assistance/browser` build as Vercel.
+
+| Command | Purpose |
+| --- | --- |
+| `npm run cap:sync` | Build and synchronize both Capacitor platforms |
+| `npm run android:sync` | Build and copy the web app into the Android project |
+| `npm run android:open` | Open the Android project in Android Studio |
+| `npm run ios:sync` | Build and copy the web app into the iOS project |
+| `npm run ios:open` | Open the iOS project in Xcode on macOS |
+
+For Android, run `npm run android:sync`, then open the project in Android Studio and run it on an emulator or USB-connected device. For iOS, run `npm run ios:sync` and `npm run ios:open` on a Mac with Xcode, then select an iPhone simulator or device.
+
+Native camera capture uses Capacitor Camera; browser/PWA users keep the regular file picker and browser camera capture. After every frontend change, run the appropriate `*:sync` command before testing a native build.
+
 ### Project layout
 
 ```text
 src/app/
-  core/                  Shared auth and Supabase integration
+   core/                  Shared auth, Supabase, native media, and deep-link integration
   features/
     auth/                Authentication page
     dashboard/
@@ -151,6 +171,9 @@ src/app/
 supabase/
   functions/             Server-side receipt, assistant, and rate workflows
   migrations/            Versioned database schema and reporting changes
+
+android/                 Capacitor Android application project
+ios/                     Capacitor iOS application project
 ```
 
 ## Security and Data Handling
@@ -169,8 +192,9 @@ Vercel is configured to build with `npm run build` and serve `dist/house-finance
 
 1. Connect the GitHub repository to the Vercel project and set `main` as the production branch.
 2. In Vercel project settings, add the production `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `APP_URL` environment variables.
-3. Add `<APP_URL>/auth` to the allowed Supabase Auth redirect URLs.
-4. Push to `main` to trigger a Vercel production deployment.
+3. Set Supabase Auth Site URL to `<APP_URL>` and add `<APP_URL>/auth` to allowed redirect URLs.
+4. Add `homefinance://auth` to Supabase Auth redirect URLs for Android and iOS confirmation and recovery callbacks.
+5. Push to `main` to trigger a Vercel production deployment.
 
 GitHub Actions independently runs `npm run verify` for pull requests and pushes to `main`. It reports build and test health, while Vercel remains responsible for deployment.
 

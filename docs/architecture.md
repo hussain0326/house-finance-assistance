@@ -2,13 +2,14 @@
 
 ## Purpose
 
-Home Finance separates browser concerns from privileged data-processing work. Angular owns the user interface and calls Supabase using a publishable key. Supabase owns authentication, Row Level Security (RLS), storage, PostgreSQL functions, and server-side Edge Functions.
+Home Finance separates browser and native-shell concerns from privileged data-processing work. Angular owns the user interface, Ionic provides mobile-oriented UI primitives, and Capacitor packages the same build for Android and iOS. Supabase owns authentication, Row Level Security (RLS), storage, PostgreSQL functions, and server-side Edge Functions.
 
 ## Boundaries
 
 | Layer | Responsibility | Must not contain |
 | --- | --- | --- |
-| Angular client | UI, form validation, routing, data presentation, authenticated Supabase calls | Service-role keys, OpenAI keys, authorization decisions |
+| Angular/Ionic client | UI, form validation, routing, data presentation, authenticated Supabase calls | Service-role keys, OpenAI keys, authorization decisions |
+| Capacitor native shell | Android/iOS packaging, device camera access, deep-link delivery | Authorization decisions or backend secrets |
 | Supabase PostgreSQL | Persisted finance data, reporting RPCs, RLS enforcement | Trust in client-side user IDs |
 | Supabase Storage | Private receipt files and signed URL access | Public receipt buckets |
 | Edge Functions | OCR/AI requests, receipt processing, exchange-rate refresh, assistant orchestration | Unscoped data access or client-provided identity trust |
@@ -23,6 +24,14 @@ Home Finance separates browser concerns from privileged data-processing work. An
 4. The function applies deterministic category and country rules, retains original money values, and persists the result.
 5. The client presents the extracted record for explicit review and correction.
 
+### Native mobile delivery
+
+1. `npm run build` produces the Angular/Ionic web bundle in `dist/house-finance-assistance/browser`.
+2. `npm run android:sync` or `npm run ios:sync` copies that bundle into the corresponding Capacitor project.
+3. Android Studio or Xcode builds, signs, and runs the native shell.
+4. On native platforms, the receipt page calls Capacitor Camera and converts the returned image to a standard browser `File` before using the same Supabase upload service as the web app.
+5. Supabase email confirmation and recovery links use `homefinance://auth`; Capacitor forwards the link to the Angular auth route, where the client stores the returned session.
+
 ### Analytics and assistant
 
 1. The client requests user-scoped reporting RPCs for dashboard, history, and analytics views.
@@ -35,6 +44,7 @@ Home Finance separates browser concerns from privileged data-processing work. An
 - RLS must be enabled for user-owned tables and policies must constrain rows to `auth.uid()`.
 - Receipt objects remain private. The app should use signed URLs only when a user needs access.
 - Browser code uses only the Supabase publishable key. `OPENAI_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` remain Edge Function secrets.
+- Capacitor projects contain no backend secrets. The native callback URL `homefinance://auth` must be listed in the Supabase Auth redirect allow-list alongside web callback URLs.
 - Receipt data and assistant prompts are sensitive. Avoid logging document contents, tokens, or customer data in the client and Edge Functions.
 
 ## Testing Strategy
@@ -53,7 +63,9 @@ Run `npm run verify` before opening a pull request. It produces an optimized pro
 
 - Apply `supabase/migrations` to the target project.
 - Configure Supabase Auth redirect URLs for `<APP_URL>/auth`.
+- Configure the native callback redirect URL `homefinance://auth` for Android and iOS.
 - Set client variables (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `APP_URL`) in the hosting environment.
 - Set Edge Function secrets separately, including `OPENAI_API_KEY`; never publish service credentials.
 - Deploy Edge Functions after their dependent migration is available.
 - Run `npm run verify` and confirm the production build output is `dist/house-finance-assistance/browser`.
+- Run `npm run android:sync` or `npm run ios:sync` before opening the corresponding native project in Android Studio or Xcode.

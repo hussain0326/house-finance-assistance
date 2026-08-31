@@ -1,21 +1,21 @@
 <section class="analytics-layout grid gap-4 lg:grid-cols-2">
   @if (feedback()) {
     <p class="feedback-banner lg:col-span-2" aria-live="polite">
-      <mat-icon>info</mat-icon>
+      <ion-icon name="information-circle-outline"></ion-icon>
       {{ feedback() }}
     </p>
   }
 
   <div class="lg:col-span-2 grid gap-3 sm:grid-cols-2">
     <div class="metric-card">
-      <div class="metric-icon metric-icon--category"><mat-icon>account_balance_wallet</mat-icon></div>
+      <div class="metric-icon metric-icon--category"><ion-icon name="wallet-outline"></ion-icon></div>
       <div>
         <p class="m-0 text-sm text-slate-600">Categorized spending</p>
         <p class="m-0 mt-1 text-2xl font-semibold">{{ categoryTotal() | currency: currencyCode() }}</p>
       </div>
     </div>
     <div class="metric-card">
-      <div class="metric-icon metric-icon--month"><mat-icon>calendar_month</mat-icon></div>
+      <div class="metric-icon metric-icon--month"><ion-icon name="calendar-outline"></ion-icon></div>
       <div>
         <p class="m-0 text-sm text-slate-600">Latest month</p>
         <p class="m-0 mt-1 text-2xl font-semibold">{{ monthlyTotal() | currency: currencyCode() }}</p>
@@ -23,9 +23,9 @@
     </div>
   </div>
 
-  <mat-card appearance="outlined" class="analytic-card p-4">
+  <ion-card class="analytic-card"><ion-card-content class="p-4">
     <div class="card-head">
-      <div class="analytic-icon analytic-icon--category"><mat-icon>donut_large</mat-icon></div>
+      <div class="analytic-icon analytic-icon--category"><ion-icon name="pie-chart-outline"></ion-icon></div>
       <div>
         <h2 class="m-0 text-xl font-semibold">Category Breakdown</h2>
         <p class="mt-1 text-slate-600">All categorized receipt spending by category.</p>
@@ -37,11 +37,11 @@
       class="chart-surface mt-3 h-72 border border-slate-200"
       aria-label="Category breakdown chart"
     >@if (loading()) { Loading analytics... }</div>
-  </mat-card>
+  </ion-card-content></ion-card>
 
-  <mat-card appearance="outlined" class="analytic-card p-4">
+  <ion-card class="analytic-card"><ion-card-content class="p-4">
     <div class="card-head">
-      <div class="analytic-icon analytic-icon--trend"><mat-icon>bar_chart</mat-icon></div>
+      <div class="analytic-icon analytic-icon--trend"><ion-icon name="bar-chart-outline"></ion-icon></div>
       <div>
         <h2 class="m-0 text-xl font-semibold">Monthly Comparison</h2>
         <p class="mt-1 text-slate-600">Track spend movement over the year.</p>
@@ -53,72 +53,57 @@
       class="chart-surface mt-3 h-72 border border-slate-200"
       aria-label="Monthly comparison chart"
     ></div>
-  </mat-card>
+  </ion-card-content></ion-card>
 
-  <mat-card appearance="outlined" class="analytic-card p-4 lg:col-span-2">
+  <ion-card class="analytic-card lg:col-span-2"><ion-card-content class="p-4">
     <div class="card-head">
-      <div class="analytic-icon analytic-icon--filter"><mat-icon>tune</mat-icon></div>
+      <div class="analytic-icon analytic-icon--filter"><ion-icon name="options-outline"></ion-icon></div>
       <div>
         <h2 class="m-0 text-xl font-semibold">Filter Spending</h2>
         <p class="mt-1 text-slate-600">Search by merchant, category, month, or year to see the total spent.</p>
       </div>
     </div>
 
-    <form class="mt-4 grid gap-3 md:grid-cols-5" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
-      <mat-form-field appearance="outline">
-        <mat-label>Merchant</mat-label>
-        <input matInput formControlName="merchant" placeholder="Aldi, H&M..." />
-      </mat-form-field>
+    <form class="analytics-filter-form" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+      <ion-input label="Merchant" labelPlacement="stacked" fill="outline" formControlName="merchant" placeholder="Aldi, H&M..."></ion-input>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Category</mat-label>
-        <mat-select formControlName="categoryId">
-          <mat-option value="">All categories</mat-option>
+      <ion-select label="Category" labelPlacement="stacked" fill="outline" formControlName="categoryId">
+          <ion-select-option value="">All categories</ion-select-option>
           @for (category of categories(); track category.id) {
-            <mat-option [value]="category.id">{{ category.name }}</mat-option>
+            <ion-select-option [value]="category.id">{{ category.name }}</ion-select-option>
           }
-        </mat-select>
-      </mat-form-field>
+      </ion-select>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Country</mat-label>
-        <mat-select formControlName="countryCode">
-          <mat-option value="">All countries</mat-option>
+      <ion-select label="Country" labelPlacement="stacked" fill="outline" formControlName="countryCode">
+          <ion-select-option value="">All countries</ion-select-option>
           @for (country of countries(); track country.code) {
-            <mat-option [value]="country.code">{{ country.name }}</mat-option>
+            <ion-select-option [value]="country.code">{{ country.name }}</ion-select-option>
           }
-        </mat-select>
-      </mat-form-field>
+      </ion-select>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Year</mat-label>
-        <mat-select formControlName="year">
-          <mat-option value="">All years</mat-option>
+      <ion-select label="Year" labelPlacement="stacked" fill="outline" formControlName="year">
+          <ion-select-option value="">All years</ion-select-option>
           @for (year of years; track year) {
-            <mat-option [value]="year">{{ year }}</mat-option>
+            <ion-select-option [value]="year">{{ year }}</ion-select-option>
           }
-        </mat-select>
-      </mat-form-field>
+      </ion-select>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Month</mat-label>
-        <mat-select formControlName="month">
-          <mat-option value="">All months</mat-option>
+      <ion-select label="Month" labelPlacement="stacked" fill="outline" formControlName="month">
+          <ion-select-option value="">All months</ion-select-option>
           @for (month of months; track month.value) {
-            <mat-option [value]="month.value">{{ month.label }}</mat-option>
+            <ion-select-option [value]="month.value">{{ month.label }}</ion-select-option>
           }
-        </mat-select>
-      </mat-form-field>
+      </ion-select>
 
-      <div class="md:col-span-5 flex flex-wrap gap-2">
-        <button mat-flat-button color="primary" type="submit" [disabled]="filterLoading()">
-          <mat-icon>filter_alt</mat-icon>
+      <div class="analytics-filter-actions">
+        <ion-button type="submit" [disabled]="filterLoading()">
+          <ion-icon slot="start" name="filter-outline"></ion-icon>
           Apply Filters
-        </button>
-        <button mat-button type="button" (click)="resetFilters()" [disabled]="filterLoading()">
-          <mat-icon>restart_alt</mat-icon>
+        </ion-button>
+        <ion-button fill="clear" type="button" (click)="resetFilters()" [disabled]="filterLoading()">
+          <ion-icon slot="start" name="refresh-outline"></ion-icon>
           Reset
-        </button>
+        </ion-button>
       </div>
     </form>
 
@@ -127,7 +112,7 @@
         <h3 class="m-0 text-base font-semibold">Spending by Country</h3>
         @for (country of countryBreakdown(); track country.country_code) {
           <div class="country-row">
-            <span class="country-name"><mat-icon>public</mat-icon>{{ country.country_name }}</span>
+            <span class="country-name"><ion-icon name="globe-outline"></ion-icon>{{ country.country_name }}</span>
             <span class="font-semibold">{{ country.total_amount | currency: currencyCode() }}</span>
           </div>
         }
@@ -161,5 +146,5 @@
         </div>
       }
     }
-  </mat-card>
+  </ion-card-content></ion-card>
 </section>

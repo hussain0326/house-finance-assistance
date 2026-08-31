@@ -1,12 +1,32 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import {
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonMenu,
+  IonMenuButton,
+  IonMenuToggle,
+  IonTabBar,
+  IonTabButton,
+  IonToolbar
+} from '@ionic/angular/standalone';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  analyticsOutline,
+  homeOutline,
+  logOutOutline,
+  receiptOutline,
+  settingsOutline,
+  sparklesOutline,
+  timeOutline
+} from 'ionicons/icons';
+import { addIcons } from 'ionicons';
 import { filter, map, startWith } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 
@@ -22,33 +42,37 @@ type NavItem = {
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    MatToolbarModule,
-    MatSidenavModule,
-    MatListModule,
-    MatButtonModule,
-    MatIconModule
+    IonButton,
+    IonButtons,
+    IonContent,
+    IonHeader,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonList,
+    IonMenu,
+    IonMenuButton,
+    IonMenuToggle,
+    IonTabBar,
+    IonTabButton,
+    IonToolbar
   ],
   templateUrl: './dashboard-shell.component.html',
   styleUrl: './dashboard-shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardShellComponent {
-  private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly router = inject(Router);
 
   readonly navItems: NavItem[] = [
-    { label: 'Dashboard', route: '/app/dashboard', icon: 'space_dashboard' },
-    { label: 'Receipt', route: '/app/receipt', icon: 'receipt_long' },
-    { label: 'Receipt History', route: '/app/history', icon: 'history' },
-    { label: 'Analytics', route: '/app/analytics', icon: 'monitoring' },
-    { label: 'AI Assistant', route: '/app/assistant', icon: 'smart_toy' },
-    { label: 'Settings', route: '/app/settings', icon: 'settings' }
+    { label: 'Dashboard', route: '/app/dashboard', icon: 'home-outline' },
+    { label: 'Receipt', route: '/app/receipt', icon: 'receipt-outline' },
+    { label: 'Receipt History', route: '/app/history', icon: 'time-outline' },
+    { label: 'Analytics', route: '/app/analytics', icon: 'analytics-outline' },
+    { label: 'AI Assistant', route: '/app/assistant', icon: 'sparkles-outline' },
+    { label: 'Settings', route: '/app/settings', icon: 'settings-outline' }
   ];
-
-  readonly isMobile = toSignal(
-    this.breakpointObserver.observe('(max-width: 767px)').pipe(map((state) => state.matches)),
-    { initialValue: false }
-  );
+  readonly mobileNavItems = this.navItems.filter((item) => item.route !== '/app/settings');
 
   readonly activeRoute = toSignal(
     this.router.events.pipe(
@@ -84,7 +108,7 @@ export class DashboardShellComponent {
     const route = this.activeRoute();
     const activeItem = this.navItems.find((item) => item.route === route);
 
-    return activeItem?.icon ?? 'dashboard';
+    return activeItem?.icon ?? 'home-outline';
   });
 
   readonly currentPageSubtitle = computed(() => {
@@ -110,7 +134,17 @@ export class DashboardShellComponent {
 
   readonly currentYear = new Date().getFullYear();
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {
+    addIcons({
+      analyticsOutline,
+      homeOutline,
+      logOutOutline,
+      receiptOutline,
+      settingsOutline,
+      sparklesOutline,
+      timeOutline
+    });
+  }
 
   async signOut(): Promise<void> {
     await this.authService.signOut();

@@ -1,7 +1,8 @@
-<mat-card appearance="outlined" class="scan-card p-4">
+<ion-card class="scan-card">
+  <ion-card-content class="p-4">
   <div class="card-head">
     <div class="head-icon">
-      <mat-icon>receipt_long</mat-icon>
+      <ion-icon name="receipt-outline" aria-hidden="true"></ion-icon>
     </div>
     <div>
       <h2 class="m-0 text-xl font-semibold">Upload Receipt</h2>
@@ -24,40 +25,33 @@
       aria-label="Scan receipt with camera"
     />
 
-    <button mat-stroked-button color="primary" type="button" class="!h-11 !rounded-xl !px-4" (click)="fileInput.click()">
-      <span class="inline-flex items-center gap-2">
-        <mat-icon>attach_file</mat-icon>
-        Choose Receipt File
-      </span>
-    </button>
+    <ion-button fill="outline" type="button" (click)="fileInput.click()">
+      <ion-icon slot="start" name="document-attach-outline"></ion-icon>
+      Choose Receipt File
+    </ion-button>
 
-    <button mat-stroked-button color="primary" type="button" class="!h-11 !rounded-xl !px-4" (click)="cameraInput.click()">
-      <span class="inline-flex items-center gap-2">
-        <mat-icon>photo_camera</mat-icon>
-        Scan with Camera
-      </span>
-    </button>
+    <ion-button fill="outline" type="button" (click)="scanWithCamera()">
+      <ion-icon slot="start" name="camera-outline"></ion-icon>
+      Scan with Camera
+    </ion-button>
 
     <p class="text-sm text-slate-600" *ngIf="selectedFile(); else noFile">{{ selectedFile()!.name }}</p>
     <ng-template #noFile>
       <p class="text-sm text-slate-500">No file selected</p>
     </ng-template>
 
-    <button
-      mat-flat-button
+    <ion-button
       color="primary"
       type="button"
       [disabled]="isUploading() || !selectedFile()"
       (click)="uploadSelected()"
     >
-      <span class="inline-flex items-center gap-2">
-        <mat-spinner *ngIf="isUploading()" diameter="16"></mat-spinner>
+        <ion-spinner *ngIf="isUploading()" name="crescent"></ion-spinner>
         @if (!isUploading()) {
-          <mat-icon>cloud_upload</mat-icon>
+          <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
         }
         Upload Receipt
-      </span>
-    </button>
+    </ion-button>
   </div>
 
   @if (uploadMessage()) {
@@ -81,16 +75,17 @@
   @if (ocrStatus() === 'complete') {
     <div class="review-card" aria-live="polite">
       <div class="review-icon">
-        <mat-icon>check_circle</mat-icon>
+        <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
       </div>
       <div>
         <p class="review-title">Receipt processed</p>
         <p class="review-copy">{{ reviewMessage() }}</p>
-        <a mat-stroked-button color="primary" routerLink="/app/history" class="review-action">
-          <mat-icon>history</mat-icon>
+        <ion-button fill="outline" routerLink="/app/history" class="review-action">
+          <ion-icon slot="start" name="time-outline"></ion-icon>
           Review in Receipt History
-        </a>
+        </ion-button>
       </div>
     </div>
   }
-</mat-card>
+  </ion-card-content>
+</ion-card>

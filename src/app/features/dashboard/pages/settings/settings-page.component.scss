@@ -4,12 +4,23 @@
 
 .settings-layout {
   display: grid;
-  gap: 1rem;
+  gap: 20px;
   max-width: 42rem;
 }
 
 .settings-card {
-  border-color: #e2e8f0;
+  border-color: var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-card-header {
+  align-items: center;
+  padding: 22px 24px 14px;
+}
+
+.settings-card-content {
+  padding: 0 24px 24px;
 }
 
 .settings-avatar {
@@ -24,59 +35,97 @@
 }
 
 .profile-avatar {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--color-primary-bg-strong);
+  color: var(--color-primary-text);
 }
 
 .security-avatar {
-  background: #dcfce7;
-  color: #15803d;
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
 }
 
 .help-avatar {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
 }
 
 .settings-form {
   display: grid;
-  gap: 0.25rem;
-  padding-top: 1rem;
+  gap: 14px;
+  padding-top: 14px;
+}
+
+.profile-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.settings-form ion-button {
+  width: fit-content;
+  min-height: 44px;
+  margin: 2px 0 0;
 }
 
 .settings-help-text {
-  margin: -0.25rem 0 0.5rem;
-  color: #64748b;
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--color-primary-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
   line-height: 1.4;
 }
 
 .settings-feedback {
-  min-height: 1.5rem;
+  min-height: 1.25rem;
   margin: 0;
-  color: #475569;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
-}
-
-.help-card mat-card-content {
-  padding-top: 1rem;
 }
 
 .help-list {
   display: grid;
-  gap: 0.875rem;
+  gap: 12px;
+}
+
+.help-list section + section {
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
 }
 
 .help-list h3 {
   margin: 0 0 0.25rem;
-  color: #0f172a;
+  color: var(--color-text);
   font-size: 0.95rem;
   font-weight: 600;
 }
 
 .help-list p {
   margin: 0;
-  color: #475569;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
   line-height: 1.45;
+}
+
+@media (max-width: 639px) {
+  .settings-layout {
+    gap: 16px;
+  }
+
+  .settings-card-header {
+    padding: 20px 18px 12px;
+  }
+
+  .settings-card-content {
+    padding: 0 18px 20px;
+  }
+
+  .profile-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-form ion-button {
+    width: 100%;
+  }
 }

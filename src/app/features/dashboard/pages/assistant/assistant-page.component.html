@@ -1,23 +1,24 @@
-<mat-card appearance="outlined" class="assistant-card">
+<ion-card class="assistant-card">
+  <ion-card-content>
   <div class="card-head">
     <div class="card-head-left">
       <div class="head-icon">
-        <mat-icon>auto_graph</mat-icon>
+        <ion-icon name="trending-up-outline" aria-hidden="true"></ion-icon>
       </div>
       <div>
         <h2 class="m-0 text-xl font-semibold">AI Assistant</h2>
         <p class="mt-1 text-slate-600">Ask questions about your spending, categories, and merchants.</p>
       </div>
     </div>
-    <button
-      mat-stroked-button
+    <ion-button
+      fill="outline"
       type="button"
-      matTooltip="Start a new conversation"
+      title="Start a new conversation"
       (click)="startNewChat()"
     >
-      <mat-icon>add_comment</mat-icon>
+      <ion-icon slot="start" name="chatbubble-ellipses-outline"></ion-icon>
       New Chat
-    </button>
+    </ion-button>
   </div>
 
   @if (messages().length === 1) {
@@ -32,7 +33,7 @@
     @for (message of messages(); track $index) {
       <div class="chat-row" [class.chat-row--user]="message.role === 'user'">
         <div class="chat-avatar" [class.chat-avatar--user]="message.role === 'user'">
-          <mat-icon>{{ message.role === 'user' ? 'person' : 'auto_awesome' }}</mat-icon>
+          <ion-icon [name]="message.role === 'user' ? 'person-outline' : 'sparkles-outline'" aria-hidden="true"></ion-icon>
         </div>
         <div class="chat-bubble-wrap">
           <div class="chat-bubble" [class.chat-bubble--user]="message.role === 'user'">
@@ -46,7 +47,7 @@
     @if (sending()) {
       <div class="chat-row">
         <div class="chat-avatar">
-          <mat-icon>auto_awesome</mat-icon>
+          <ion-icon name="sparkles-outline" aria-hidden="true"></ion-icon>
         </div>
         <div class="chat-bubble-wrap">
           <div class="chat-bubble chat-bubble--typing">
@@ -74,15 +75,16 @@
       placeholder="Ask about your spending... (Enter to send, Shift+Enter for a new line)"
       [disabled]="sending()"
     ></textarea>
-    <button
-      mat-icon-button
+    <ion-button
+      fill="solid"
       color="primary"
       type="submit"
       class="composer-send"
       [disabled]="sending() || !draft().trim()"
       aria-label="Send message"
     >
-      <mat-icon>send</mat-icon>
-    </button>
+      <ion-icon slot="icon-only" name="send-outline"></ion-icon>
+    </ion-button>
   </form>
-</mat-card>
+  </ion-card-content>
+</ion-card>

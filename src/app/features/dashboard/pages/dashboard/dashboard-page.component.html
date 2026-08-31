@@ -1,5 +1,5 @@
 <section class="dashboard-intro">
-  <div class="intro-icon"><mat-icon>home</mat-icon></div>
+  <div class="intro-icon"><ion-icon name="home-outline"></ion-icon></div>
   <div>
     <h2 class="m-0 text-2xl font-semibold text-slate-900">
       Welcome back{{ profile().firstName ? ', ' + profile().firstName : '' }}
@@ -9,43 +9,34 @@
 </section>
 
 <section class="grid gap-4 md:grid-cols-3" aria-label="Spending summary cards">
-  <mat-card class="summary-card elevated-card" appearance="outlined">
-    <mat-card-content>
-      <div class="summary-label"><span class="metric-icon metric-icon--month"><mat-icon>calendar_month</mat-icon></span>Monthly Spending</div>
+  <ion-card class="summary-card elevated-card"><ion-card-content>
+      <div class="summary-label"><span class="metric-icon metric-icon--month"><ion-icon name="calendar-outline"></ion-icon></span>Monthly Spending</div>
       <p class="summary-value">{{ monthlySpend() | currency: currencyCode() }}</p>
-    </mat-card-content>
-  </mat-card>
+    </ion-card-content></ion-card>
 
-  <mat-card class="summary-card elevated-card" appearance="outlined">
-    <mat-card-content>
-      <div class="summary-label"><span class="metric-icon metric-icon--annual"><mat-icon>event_repeat</mat-icon></span>Annual Spending</div>
+  <ion-card class="summary-card elevated-card"><ion-card-content>
+      <div class="summary-label"><span class="metric-icon metric-icon--annual"><ion-icon name="repeat-outline"></ion-icon></span>Annual Spending</div>
       <p class="summary-value">{{ annualSpend() | currency: currencyCode() }}</p>
-    </mat-card-content>
-  </mat-card>
+    </ion-card-content></ion-card>
 
-  <mat-card class="summary-card elevated-card" appearance="outlined">
-    <mat-card-content>
-      <div class="summary-label"><span class="metric-icon metric-icon--average"><mat-icon>insights</mat-icon></span>Average Daily Spend</div>
+  <ion-card class="summary-card elevated-card"><ion-card-content>
+      <div class="summary-label"><span class="metric-icon metric-icon--average"><ion-icon name="stats-chart-outline"></ion-icon></span>Average Daily Spend</div>
       <p class="summary-value">{{ avgSpend() | currency: currencyCode() }}</p>
-    </mat-card-content>
-  </mat-card>
+    </ion-card-content></ion-card>
 </section>
 
 <section class="mt-4 grid gap-4 lg:grid-cols-2">
-  <mat-card appearance="outlined" class="elevated-card">
-    <mat-card-header>
-      <mat-card-title class="card-title-wrap">
-        <span class="section-icon section-icon--receipts"><mat-icon>receipt_long</mat-icon></span>
+  <ion-card class="elevated-card"><ion-card-content>
+      <h3 class="card-title-wrap">
+        <span class="section-icon section-icon--receipts"><ion-icon name="receipt-outline"></ion-icon></span>
         Recent Expenses
-      </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
+      </h3>
       <ul class="mt-2 flex list-none flex-col gap-3 p-0">
         @for (expense of recentExpenses(); track expense.merchant + expense.date) {
           <li class="expense-row">
             <div class="flex items-center justify-between gap-4">
               <div class="expense-details">
-                <span class="expense-icon"><mat-icon>receipt</mat-icon></span>
+                <span class="expense-icon"><ion-icon name="receipt-outline"></ion-icon></span>
                 <div>
                 <p class="m-0 font-medium">{{ expense.merchant }}</p>
                 <p class="m-0 text-sm text-slate-600">{{ expense.category }} • {{ expense.date | date }}</p>
@@ -56,22 +47,18 @@
           </li>
         } @empty {
           <li class="empty-expenses">
-            <mat-icon>receipt_long</mat-icon>
+            <ion-icon name="receipt-outline"></ion-icon>
             <span>Your recent receipts will appear here.</span>
           </li>
         }
       </ul>
-    </mat-card-content>
-  </mat-card>
+    </ion-card-content></ion-card>
 
-  <mat-card appearance="outlined" class="elevated-card">
-    <mat-card-header>
-      <mat-card-title class="card-title-wrap">
-        <span class="section-icon section-icon--trend"><mat-icon>trending_up</mat-icon></span>
+  <ion-card class="elevated-card"><ion-card-content>
+      <h3 class="card-title-wrap">
+        <span class="section-icon section-icon--trend"><ion-icon name="trending-up-outline"></ion-icon></span>
         Spending Trends
-      </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
+      </h3>
       <div
         echarts
         [options]="trendChartOptions()"
@@ -79,6 +66,5 @@
         aria-label="Monthly spending trend chart"
       >
       </div>
-    </mat-card-content>
-  </mat-card>
+    </ion-card-content></ion-card>
 </section>

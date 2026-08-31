@@ -2,13 +2,22 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import {
+  IonButton,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonIcon,
+  IonInput,
+  IonNote,
+  IonSelect,
+  IonSelectOption,
+  IonSpinner
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { lockOpenOutline, logInOutline, personAddOutline } from 'ionicons/icons';
 import {
   AuthService,
   DEMO_ACCOUNT_EMAIL,
@@ -22,13 +31,18 @@ import {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatButtonModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatSelectModule,
-    MatProgressSpinnerModule
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardSubtitle,
+    IonCardTitle,
+    IonIcon,
+    IonInput,
+    IonNote,
+    IonSelect,
+    IonSelectOption,
+    IonSpinner
   ],
   templateUrl: './auth-page.component.html',
   styleUrl: './auth-page.component.scss',
@@ -62,10 +76,10 @@ export class AuthPageComponent {
   );
   readonly authIcon = computed(() =>
     this.isPasswordRecovery() || this.isForgotPasswordSignal()
-      ? 'lock_reset'
+      ? 'lock-open-outline'
       : this.isSignInModeSignal()
-        ? 'login'
-        : 'person_add'
+        ? 'log-in-outline'
+        : 'person-add-outline'
   );
   readonly submitLabel = computed(() =>
     this.isPasswordRecovery()
@@ -84,6 +98,7 @@ export class AuthPageComponent {
     private readonly formBuilder: FormBuilder,
     private readonly router: Router
   ) {
+    addIcons({ lockOpenOutline, logInOutline, personAddOutline });
     this.form = this.formBuilder.nonNullable.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]],

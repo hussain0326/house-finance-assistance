@@ -8,10 +8,9 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { IonButton, IonCard, IonCardContent, IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { chatbubbleEllipsesOutline, personOutline, sendOutline, sparklesOutline, trendingUpOutline } from 'ionicons/icons';
 import { AssistantService } from '../../services/assistant.service';
 
 type ChatMessage = {
@@ -32,7 +31,7 @@ const WELCOME_MESSAGE =
 
 @Component({
   selector: 'app-assistant-page',
-  imports: [CommonModule, FormsModule, MatCardModule, MatIconModule, MatButtonModule, MatTooltipModule],
+  imports: [CommonModule, FormsModule, IonButton, IonCard, IonCardContent, IonIcon],
   templateUrl: './assistant-page.component.html',
   styleUrl: './assistant-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -49,7 +48,9 @@ export class AssistantPageComponent implements AfterViewChecked {
   private conversationId: string | null = null;
   private shouldScroll = false;
 
-  constructor(private readonly assistantService: AssistantService) {}
+  constructor(private readonly assistantService: AssistantService) {
+    addIcons({ chatbubbleEllipsesOutline, personOutline, sendOutline, sparklesOutline, trendingUpOutline });
+  }
 
   ngAfterViewChecked(): void {
     if (this.shouldScroll && this.scrollContainer) {

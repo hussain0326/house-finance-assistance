@@ -1,12 +1,9 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { IonButton, IonCard, IonCardContent, IonIcon, IonInput, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { barChartOutline, calendarOutline, filterOutline, globeOutline, informationCircleOutline, optionsOutline, pieChartOutline, refreshOutline, walletOutline } from 'ionicons/icons';
 import { EChartsCoreOption } from 'echarts/core';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import { AuthService } from '../../../../core/auth/auth.service';
@@ -36,15 +33,16 @@ const MONTHS = [
 @Component({
   selector: 'app-analytics-page',
   imports: [
-    MatCardModule,
     NgxEchartsDirective,
-    MatIconModule,
     CurrencyPipe,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonIcon,
+    IonInput,
+    IonSelect,
+    IonSelectOption
   ],
   templateUrl: './analytics-page.component.html',
   styleUrl: './analytics-page.component.scss',
@@ -117,6 +115,7 @@ export class AnalyticsPageComponent {
     private readonly receiptService?: ReceiptService,
     private readonly authService?: AuthService
   ) {
+    addIcons({ barChartOutline, calendarOutline, filterOutline, globeOutline, informationCircleOutline, optionsOutline, pieChartOutline, refreshOutline, walletOutline });
     this.filterForm = (this.formBuilder ?? new FormBuilder()).group({
       merchant: [''],
       categoryId: [''],

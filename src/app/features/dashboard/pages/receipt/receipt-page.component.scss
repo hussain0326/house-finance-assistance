@@ -1,8 +1,8 @@
 .scan-card {
-  border-radius: 12px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .card-head {
@@ -15,12 +15,12 @@
 .head-icon {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--color-primary-bg-strong);
+  color: var(--color-primary-text);
   font-size: 21px;
   line-height: 1;
 }
@@ -30,11 +30,11 @@
   grid-template-columns: 2.5rem 1fr;
   gap: 0.75rem;
   margin-top: 1rem;
-  border: 1px solid #bbf7d0;
-  border-radius: 0.75rem;
-  background: #f0fdf4;
+  border: 1px solid var(--color-success-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-success-bg-strong);
   padding: 0.875rem;
-  color: #166534;
+  color: var(--color-success-text);
 }
 
 .review-icon {
@@ -43,9 +43,9 @@
   height: 2.5rem;
   align-items: center;
   justify-content: center;
-  border-radius: 0.625rem;
-  background: #16a34a;
-  color: #ffffff;
+  border-radius: var(--radius-md);
+  background: var(--color-success);
+  color: var(--color-surface);
 }
 
 .review-icon .mat-icon {
@@ -56,13 +56,13 @@
 
 .review-title {
   margin: 0;
-  color: #0f172a;
+  color: var(--color-text);
   font-weight: 700;
 }
 
 .review-copy {
   margin: 0.25rem 0 0.75rem;
-  color: #166534;
+  color: var(--color-success-text);
   font-size: 0.875rem;
   line-height: 1.45;
 }

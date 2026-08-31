@@ -1,0 +1,146 @@
+:root {
+  --ion-font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+
+  // Neutral scale (slate)
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #f8fafc;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-400: #94a3b8;
+  --color-neutral-500: #64748b;
+  --color-neutral-600: #475569;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1e293b;
+  --color-neutral-900: #0f172a;
+
+  // Surfaces & text
+  --color-surface: var(--color-neutral-0);
+  --color-surface-alt: var(--color-neutral-50);
+  --color-surface-muted: var(--color-neutral-100);
+  --color-border: var(--color-neutral-200);
+  --color-border-strong: var(--color-neutral-300);
+  --color-text: var(--color-neutral-900);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-muted: var(--color-neutral-400);
+
+  // Brand
+  --color-primary: #4f46e5;
+  --color-primary-rgb: 79, 70, 229;
+  --color-primary-contrast: #ffffff;
+  --color-primary-shade: #463ed1;
+  --color-primary-tint: #6158e8;
+  --color-primary-bg: #eff6ff;
+  --color-primary-bg-strong: #dbeafe;
+  --color-primary-border: #bfdbfe;
+  --color-primary-text: #1d4ed8;
+  --color-primary-text-strong: #1e40af;
+
+  --color-secondary: #0f766e;
+  --color-secondary-rgb: 15, 118, 110;
+  --color-secondary-contrast: #ffffff;
+  --color-secondary-shade: #0d685f;
+  --color-secondary-tint: #277f7a;
+  --color-secondary-bg: #ccfbf1;
+
+  // Semantic
+  --color-success: #16a34a;
+  --color-success-bg: #dcfce7;
+  --color-success-bg-strong: #f0fdf4;
+  --color-success-text: #15803d;
+  --color-success-border: #bbf7d0;
+
+  --color-warning: #d97706;
+  --color-warning-bg: #fef3c7;
+  --color-warning-text: #b45309;
+
+  --color-danger: #b91c1c;
+  --color-danger-rgb: 185, 28, 28;
+  --color-danger-contrast: #ffffff;
+  --color-danger-shade: #a31919;
+  --color-danger-tint: #c33030;
+  --color-danger-bg: #fee2e2;
+  --color-danger-border: #fecaca;
+  --color-danger-text: #991b1b;
+
+  // Radius
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 999px;
+
+  // Spacing scale
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  // Shadows (subtle, per design system)
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 2px 10px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.08);
+
+  // Motion
+  --transition-fast: 120ms ease;
+  --transition-base: 180ms ease;
+
+  // Ionic bindings
+  --ion-background-color: var(--color-surface-alt);
+  --ion-text-color: var(--color-text);
+  --ion-color-primary: var(--color-primary);
+  --ion-color-primary-rgb: var(--color-primary-rgb);
+  --ion-color-primary-contrast: var(--color-primary-contrast);
+  --ion-color-primary-shade: var(--color-primary-shade);
+  --ion-color-primary-tint: var(--color-primary-tint);
+  --ion-color-secondary: var(--color-secondary);
+  --ion-color-secondary-rgb: var(--color-secondary-rgb);
+  --ion-color-secondary-contrast: var(--color-secondary-contrast);
+  --ion-color-secondary-shade: var(--color-secondary-shade);
+  --ion-color-secondary-tint: var(--color-secondary-tint);
+  --ion-color-danger: var(--color-danger);
+  --ion-color-danger-rgb: var(--color-danger-rgb);
+  --ion-color-danger-contrast: var(--color-danger-contrast);
+  --ion-color-danger-shade: var(--color-danger-shade);
+  --ion-color-danger-tint: var(--color-danger-tint);
+}
+
+// Dark theme: follows OS preference, keeps the same token names so components never hardcode colors.
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface: #111827;
+    --color-surface-alt: #0b1220;
+    --color-surface-muted: #1e293b;
+    --color-border: #1f2937;
+    --color-border-strong: #334155;
+    --color-text: #f8fafc;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #64748b;
+
+    --color-primary-bg: #1e2a4a;
+    --color-primary-bg-strong: #1e3a8a;
+    --color-primary-text: #93c5fd;
+    --color-primary-text-strong: #bfdbfe;
+
+    --color-secondary-bg: #0f2f2c;
+
+    --color-success-bg: #0f2f1e;
+    --color-success-bg-strong: #0b2417;
+    --color-success-text: #4ade80;
+    --color-success-border: #14532d;
+
+    --color-warning-bg: #3a2a0a;
+    --color-warning-text: #fbbf24;
+
+    --color-danger-bg: #3a1414;
+    --color-danger-border: #7f1d1d;
+    --color-danger-text: #fca5a5;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+}

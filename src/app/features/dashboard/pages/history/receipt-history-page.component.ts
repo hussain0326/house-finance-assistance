@@ -1,14 +1,9 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { IonButton, IonCard, IonCardContent, IonCheckbox, IonIcon, IonInput, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { closeOutline, createOutline, documentTextOutline, filterOutline, informationCircleOutline, openOutline, receiptOutline, refreshOutline, saveOutline, trashOutline } from 'ionicons/icons';
 import { ExpenseCategory, ExpenseCountry, ReceiptHistoryItem, ReceiptService } from '../../services/receipt.service';
 
 const MONTHS = [
@@ -31,14 +26,14 @@ const MONTHS = [
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatCheckboxModule,
-    MatIconModule,
-    MatPaginatorModule,
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonCheckbox,
+    IonIcon,
+    IonInput,
+    IonSelect,
+    IonSelectOption,
     CurrencyPipe,
     DatePipe
   ],
@@ -79,6 +74,7 @@ export class ReceiptHistoryPageComponent {
     private readonly formBuilder: FormBuilder,
     private readonly receiptService: ReceiptService
   ) {
+    addIcons({ closeOutline, createOutline, documentTextOutline, filterOutline, informationCircleOutline, openOutline, receiptOutline, refreshOutline, saveOutline, trashOutline });
     this.filterForm = this.formBuilder.group({
       search: [''],
       categoryId: [''],
@@ -103,9 +99,30 @@ export class ReceiptHistoryPageComponent {
     await this.loadPage();
   }
 
-  async onPageChange(event: PageEvent): Promise<void> {
-    this.pageIndex.set(event.pageIndex);
-    this.pageSize.set(event.pageSize);
+  get hasPreviousPage(): boolean {
+    return this.pageIndex() > 0;
+  }
+
+  get hasNextPage(): boolean {
+    return (this.pageIndex() + 1) * this.pageSize() < this.total();
+  }
+
+  async changePage(direction: number): Promise<void> {
+    const nextIndex = this.pageIndex() + direction;
+    if (nextIndex < 0 || (direction > 0 && !this.hasNextPage)) {
+      return;
+    }
+    this.pageIndex.set(nextIndex);
+    await this.loadPage();
+  }
+
+  async changePageSize(value: string | number | null | undefined): Promise<void> {
+    const size = Number(value);
+    if (![5, 10, 20, 50].includes(size)) {
+      return;
+    }
+    this.pageSize.set(size);
+    this.pageIndex.set(0);
     await this.loadPage();
   }
 

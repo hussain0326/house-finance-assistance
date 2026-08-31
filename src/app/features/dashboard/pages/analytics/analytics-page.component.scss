@@ -1,8 +1,8 @@
 .analytic-card {
-  border-radius: 12px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .feedback-banner {
@@ -10,24 +10,24 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  border-radius: 8px;
-  background: #f1f5f9;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
   padding: 12px 16px;
-  color: #475569;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
 }
 
 .feedback-banner .mat-icon {
-  color: #2563eb;
+  color: var(--color-primary);
 }
 
 .metric-card {
   display: flex;
   align-items: center;
   gap: 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
   padding: 12px 16px;
 }
 
@@ -46,19 +46,19 @@
 
 .metric-icon--category,
 .analytic-icon--category {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--color-primary-bg-strong);
+  color: var(--color-primary-text);
 }
 
 .metric-icon--month,
 .analytic-icon--trend {
-  background: #dcfce7;
-  color: #15803d;
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
 }
 
 .analytic-icon--filter {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
 }
 
 .card-head {
@@ -68,9 +68,35 @@
   align-items: start;
 }
 
+.analytics-filter-form {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.analytics-filter-actions {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 1023px) {
+  .analytics-filter-form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 639px) {
+  .analytics-filter-form {
+    grid-template-columns: 1fr;
+  }
+}
+
 .chart-surface {
-  border-radius: 8px;
-  background: #f8fafc;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-alt);
 }
 
 .country-row {
@@ -78,8 +104,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   padding: 8px 12px;
   font-size: 0.875rem;
 }
@@ -88,12 +114,12 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #334155;
+  color: var(--color-text-secondary);
 }
 
 .country-name .mat-icon {
   width: 18px;
   height: 18px;
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 18px;
 }
