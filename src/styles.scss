@@ -13,6 +13,14 @@
 html,
 body {
 	height: 100%;
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+// Removes the default gray tap-flash on Android/iOS Chrome so our own
+// hover/focus/active states (not the browser's) are what users see.
+* {
+	-webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -24,11 +32,35 @@ body {
 
 // Guarantee a visible, theme-consistent border on outline-fill inputs across all platforms/browsers,
 // instead of relying on Ionic's platform-specific step-color fallbacks.
+// !important is required: Ionic's own :host(.input-fill-outline) rule has higher specificity
+// than a plain light-DOM element/attribute selector and would otherwise win the cascade.
 ion-input[fill='outline'],
 ion-select[fill='outline'] {
-	--border-color: var(--color-border-strong);
-	--border-width: 1px;
-	--highlight-color-focused: var(--color-primary);
+	--background: var(--color-surface) !important;
+	--border-color: var(--color-neutral-400) !important;
+	--border-width: 1.5px !important;
+	--border-radius: var(--radius-md) !important;
+	--color: var(--color-text) !important;
+	--placeholder-color: var(--color-text-muted) !important;
+	--highlight-color-focused: var(--color-primary) !important;
+	border-radius: var(--radius-md);
+	transition: box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+ion-input[fill='outline']:hover,
+ion-select[fill='outline']:hover {
+	--border-color: var(--color-neutral-500) !important;
+}
+
+ion-input[fill='outline'].has-focus,
+ion-select[fill='outline'].has-focus {
+	--border-color: var(--color-primary) !important;
+	box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+}
+
+ion-input[fill='outline'].ion-touched.ion-invalid,
+ion-select[fill='outline'].ion-touched.ion-invalid {
+	--border-color: var(--color-danger) !important;
 }
 
 * {
