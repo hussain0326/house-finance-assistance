@@ -1,10 +1,13 @@
+ion-content.auth-scroll {
+  --background: var(--color-surface-muted);
+}
+
 .auth-bg {
   display: grid;
   min-height: 100vh;
   min-height: 100dvh;
   place-items: center;
   padding: 24px;
-  background: var(--color-surface-muted);
 }
 
 .auth-layout {

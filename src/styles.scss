@@ -30,8 +30,9 @@ body {
 	color: var(--color-text);
 }
 
-// Guarantee a visible, theme-consistent border on outline-fill inputs across all platforms/browsers,
-// instead of relying on Ionic's platform-specific step-color fallbacks.
+// Guarantee a visible, theme-consistent border on outline-fill inputs across all platforms/browsers.
+// Uses Ionic's own --border-color/--border-width custom properties (not a plain light-DOM border)
+// so its built-in notch cutout for the floating/stacked label above the border still works correctly.
 // !important is required: Ionic's own :host(.input-fill-outline) rule has higher specificity
 // than a plain light-DOM element/attribute selector and would otherwise win the cascade.
 ion-input[fill='outline'],
@@ -43,8 +44,7 @@ ion-select[fill='outline'] {
 	--color: var(--color-text) !important;
 	--placeholder-color: var(--color-text-muted) !important;
 	--highlight-color-focused: var(--color-primary) !important;
-	border-radius: var(--radius-md);
-	transition: box-shadow var(--transition-base), border-color var(--transition-base);
+	transition: box-shadow var(--transition-base);
 }
 
 ion-input[fill='outline']:hover,
