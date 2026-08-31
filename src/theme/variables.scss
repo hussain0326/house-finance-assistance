@@ -88,6 +88,12 @@
   --transition-fast: 120ms ease;
   --transition-base: 180ms ease;
 
+  // Safe-area insets (requires viewport-fit=cover); used to avoid iOS Safari's floating toolbar
+  --ion-safe-area-top: env(safe-area-inset-top);
+  --ion-safe-area-bottom: env(safe-area-inset-bottom);
+  --ion-safe-area-left: env(safe-area-inset-left);
+  --ion-safe-area-right: env(safe-area-inset-right);
+
   // Ionic bindings
   --ion-background-color: var(--color-surface-alt);
   --ion-text-color: var(--color-text);

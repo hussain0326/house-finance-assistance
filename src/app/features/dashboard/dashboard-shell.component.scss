@@ -1,6 +1,7 @@
 .app-layout {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--color-surface-alt);
 }
 
@@ -15,6 +16,7 @@
   display: flex;
   min-width: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   flex: 1;
   flex-direction: column;
   background: var(--color-surface-alt);
@@ -200,6 +202,8 @@ ion-menu {
 
   .bottom-nav {
     display: flex;
+    height: calc(56px + var(--ion-safe-area-bottom, 0px));
+    padding-bottom: var(--ion-safe-area-bottom, 0px);
   }
 
   .bottom-nav ion-label {
