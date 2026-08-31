@@ -34,7 +34,9 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimations(),
-    provideIonicAngular(),
+    // Force a single design language everywhere (not iOS on Apple devices vs Material elsewhere),
+    // so the app looks and behaves identically across all platforms.
+    provideIonicAngular({ mode: 'md' }),
     provideEchartsCore({ echarts }),
     provideRouter(routes), provideServiceWorker('ngsw-worker.js', {
             enabled: !isDevMode(),

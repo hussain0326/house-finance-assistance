@@ -30,37 +30,44 @@ body {
 	color: var(--color-text);
 }
 
-// Guarantee a visible, theme-consistent border on outline-fill inputs across all platforms/browsers.
-// Uses Ionic's own --border-color/--border-width custom properties (not a plain light-DOM border)
-// so its built-in notch cutout for the floating/stacked label above the border still works correctly.
-// !important is required: Ionic's own :host(.input-fill-outline) rule has higher specificity
-// than a plain light-DOM element/attribute selector and would otherwise win the cascade.
-ion-input[fill='outline'],
-ion-select[fill='outline'] {
+
+ion-input[fill='solid'],
+ion-select[fill='solid'] {
 	--background: var(--color-surface) !important;
-	--border-color: var(--color-neutral-400) !important;
-	--border-width: 1.5px !important;
+	--border-width: 0 !important;
 	--border-radius: var(--radius-md) !important;
 	--color: var(--color-text) !important;
+	--min-height: 48px !important;
 	--placeholder-color: var(--color-text-muted) !important;
 	--highlight-color-focused: var(--color-primary) !important;
-	transition: box-shadow var(--transition-base);
+	border: 1.5px solid var(--color-neutral-400);
+	border-radius: var(--radius-md);
+	background: var(--color-surface);
+	box-shadow: var(--shadow-sm);
+	transition: box-shadow var(--transition-base), border-color var(--transition-base), background-color var(--transition-base);
 }
 
-ion-input[fill='outline']:hover,
-ion-select[fill='outline']:hover {
-	--border-color: var(--color-neutral-500) !important;
+ion-input[fill='solid']:hover,
+ion-select[fill='solid']:hover {
+	border-color: var(--color-neutral-500);
 }
 
-ion-input[fill='outline'].has-focus,
-ion-select[fill='outline'].has-focus {
-	--border-color: var(--color-primary) !important;
+ion-input[fill='solid'].has-focus,
+ion-select[fill='solid'].has-focus {
+	border-color: var(--color-primary);
 	box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
 }
 
-ion-input[fill='outline'].ion-touched.ion-invalid,
-ion-select[fill='outline'].ion-touched.ion-invalid {
-	--border-color: var(--color-danger) !important;
+ion-input[fill='solid'].ion-touched.ion-invalid,
+ion-select[fill='solid'].ion-touched.ion-invalid {
+	border-color: var(--color-danger);
+	background: var(--color-danger-bg);
+	box-shadow: none;
+}
+
+ion-input[fill='solid'].ion-touched.ion-invalid.has-focus,
+ion-select[fill='solid'].ion-touched.ion-invalid.has-focus {
+	box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.15);
 }
 
 * {

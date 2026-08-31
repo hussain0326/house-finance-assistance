@@ -21,7 +21,7 @@
       <ion-card-content class="auth-content">
         <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()" aria-label="Authentication form">
           @if (!isPasswordRecovery()) {
-            <ion-input label="Email" labelPlacement="stacked" fill="outline" formControlName="email" autocomplete="email" type="email"></ion-input>
+            <ion-input label="Email" labelPlacement="stacked" fill="solid" formControlName="email" autocomplete="email" type="email"></ion-input>
             @if (form.controls.email.touched && form.controls.email.hasError('required')) {
               <ion-note class="field-feedback" color="danger">Email is required.</ion-note>
             } @else if (form.controls.email.touched && form.controls.email.hasError('email')) {
@@ -31,11 +31,11 @@
 
           @if (!isPasswordRecovery() && !isForgotPassword() && !isSignInMode()) {
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <ion-input label="First name" labelPlacement="stacked" fill="outline" formControlName="firstName" autocomplete="given-name"></ion-input>
-              <ion-input label="Last name" labelPlacement="stacked" fill="outline" formControlName="lastName" autocomplete="family-name"></ion-input>
+              <ion-input label="First name" labelPlacement="stacked" fill="solid" formControlName="firstName" autocomplete="given-name"></ion-input>
+              <ion-input label="Last name" labelPlacement="stacked" fill="solid" formControlName="lastName" autocomplete="family-name"></ion-input>
             </div>
 
-            <ion-select label="Default currency" labelPlacement="stacked" fill="outline" formControlName="defaultCurrency" aria-label="Default currency">
+            <ion-select label="Default currency" labelPlacement="stacked" fill="solid" formControlName="defaultCurrency" aria-label="Default currency">
                 @for (currency of currencies; track currency) {
                   <ion-select-option [value]="currency">{{ currency }}</ion-select-option>
                 }
@@ -43,7 +43,7 @@
           }
 
           @if (!isForgotPassword()) {
-            <ion-input label="{{ isPasswordRecovery() ? 'New password' : 'Password' }}" labelPlacement="stacked" fill="outline" formControlName="password" [autocomplete]="isPasswordRecovery() ? 'new-password' : 'current-password'" type="password"></ion-input>
+            <ion-input label="{{ isPasswordRecovery() ? 'New password' : 'Password' }}" labelPlacement="stacked" fill="solid" formControlName="password" [autocomplete]="isPasswordRecovery() ? 'new-password' : 'current-password'" type="password"></ion-input>
             @if (form.controls.password.touched && form.controls.password.hasError('required')) {
               <ion-note class="field-feedback" color="danger">Password is required.</ion-note>
             } @else if (form.controls.password.touched && form.controls.password.hasError('pattern')) {

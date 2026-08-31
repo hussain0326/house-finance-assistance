@@ -8,10 +8,10 @@
       }
       <form class="settings-form" [formGroup]="form" (ngSubmit)="saveProfile()">
         <div class="profile-fields">
-        <ion-input label="First name" labelPlacement="stacked" fill="outline" formControlName="firstName" autocomplete="given-name"></ion-input>
-        <ion-input label="Last name" labelPlacement="stacked" fill="outline" formControlName="lastName" autocomplete="family-name"></ion-input>
+        <ion-input label="First name" labelPlacement="stacked" fill="solid" formControlName="firstName" autocomplete="given-name"></ion-input>
+        <ion-input label="Last name" labelPlacement="stacked" fill="solid" formControlName="lastName" autocomplete="family-name"></ion-input>
         </div>
-        <ion-select label="Default currency" labelPlacement="stacked" fill="outline" formControlName="defaultCurrency" aria-label="Default currency">
+        <ion-select label="Default currency" labelPlacement="stacked" fill="solid" formControlName="defaultCurrency" aria-label="Default currency">
             @for (currency of currencies; track currency) {
               <ion-select-option [value]="currency">{{ currency }}</ion-select-option>
             }
@@ -34,8 +34,8 @@
         <p class="settings-help-text">This is a shared demo account, so password changes are disabled.</p>
       }
       <form class="settings-form" [formGroup]="passwordForm" (ngSubmit)="changePassword()">
-        <ion-input label="New password" labelPlacement="stacked" fill="outline" formControlName="password" autocomplete="new-password" type="password"></ion-input>
-        <ion-input label="Confirm new password" labelPlacement="stacked" fill="outline" formControlName="confirmPassword" autocomplete="new-password" type="password"></ion-input>
+        <ion-input label="New password" labelPlacement="stacked" fill="solid" formControlName="password" autocomplete="new-password" type="password"></ion-input>
+        <ion-input label="Confirm new password" labelPlacement="stacked" fill="solid" formControlName="confirmPassword" autocomplete="new-password" type="password"></ion-input>
         <p class="settings-feedback" aria-live="polite">{{ passwordFeedback() }}</p>
         <ion-button type="submit" [disabled]="isChangingPassword() || isDemoAccount">
           Update password

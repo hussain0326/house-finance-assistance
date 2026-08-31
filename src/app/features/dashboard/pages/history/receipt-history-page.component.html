@@ -10,30 +10,30 @@
   </div>
 
   <form class="mt-4 grid gap-3 md:grid-cols-3 lg:grid-cols-5" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
-    <ion-input label="Merchant Name" labelPlacement="stacked" fill="outline" formControlName="search" placeholder="Aldi, utility, transport..."></ion-input>
+    <ion-input label="Merchant Name" labelPlacement="stacked" fill="solid" formControlName="search" placeholder="Aldi, utility, transport..."></ion-input>
 
-    <ion-select label="Category" labelPlacement="stacked" fill="outline" formControlName="categoryId">
+    <ion-select label="Category" labelPlacement="stacked" fill="solid" formControlName="categoryId">
         <ion-select-option value="">All categories</ion-select-option>
         @for (category of categories(); track category.id) {
           <ion-select-option [value]="category.id">{{ category.name }}</ion-select-option>
         }
     </ion-select>
 
-    <ion-select label="Country" labelPlacement="stacked" fill="outline" formControlName="countryCode">
+    <ion-select label="Country" labelPlacement="stacked" fill="solid" formControlName="countryCode">
         <ion-select-option value="">All countries</ion-select-option>
         @for (country of countries(); track country.code) {
           <ion-select-option [value]="country.code">{{ country.name }}</ion-select-option>
         }
     </ion-select>
 
-    <ion-select label="Year" labelPlacement="stacked" fill="outline" formControlName="year">
+    <ion-select label="Year" labelPlacement="stacked" fill="solid" formControlName="year">
         <ion-select-option value="">All years</ion-select-option>
         @for (year of years; track year) {
           <ion-select-option [value]="year">{{ year }}</ion-select-option>
         }
     </ion-select>
 
-    <ion-select label="Month" labelPlacement="stacked" fill="outline" formControlName="month">
+    <ion-select label="Month" labelPlacement="stacked" fill="solid" formControlName="month">
         <ion-select-option value="">All months</ion-select-option>
         @for (month of months; track month.value) {
           <ion-select-option [value]="month.value">{{ month.label }}</ion-select-option>
@@ -245,7 +245,7 @@
   </div>
 
   <div class="history-pagination" aria-label="Receipt pagination">
-    <ion-select label="Rows" labelPlacement="stacked" fill="outline" [value]="pageSize()" (ionChange)="changePageSize($event.detail.value)">
+    <ion-select label="Rows" labelPlacement="stacked" fill="solid" [value]="pageSize()" (ionChange)="changePageSize($event.detail.value)">
       <ion-select-option [value]="5">5</ion-select-option><ion-select-option [value]="10">10</ion-select-option><ion-select-option [value]="20">20</ion-select-option><ion-select-option [value]="50">50</ion-select-option>
     </ion-select>
     <span>Page {{ pageIndex() + 1 }}</span>
