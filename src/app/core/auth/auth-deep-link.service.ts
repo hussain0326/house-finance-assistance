@@ -4,7 +4,7 @@ import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { SupabaseService } from '../supabase/supabase.service';
 
-const AUTH_CALLBACK_URL = 'homefinance://auth';
+const AUTH_CALLBACK_URL = 'expenseintel://auth';
 
 @Injectable({
   providedIn: 'root'

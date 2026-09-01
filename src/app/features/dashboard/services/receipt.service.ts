@@ -161,6 +161,9 @@ export type FilteredAnalyticsResult = {
 })
 export class ReceiptService {
   private readonly bucketName = 'receipt-images';
+  private readonly signedUrlExpirySeconds = 60 * 30;
+  private readonly signedUrlCache = new Map<string, { url: string; expiresAt: number }>();
+  private readonly pendingSignRequests = new Map<string, Promise<string | undefined>>();
 
   constructor(
     private readonly supabaseService: SupabaseService,
@@ -302,19 +305,19 @@ export class ReceiptService {
         return {
           success: false,
           message: details
-            ? `Receipt uploaded, but OCR processing failed: ${details}`
-            : 'Receipt uploaded, but OCR processing failed.'
+            ? `Receipt uploaded, but we couldn't read the details automatically: ${details}`
+            : "Receipt uploaded, but we couldn't read the details automatically."
         };
       }
 
       return {
         success: true,
-        message: 'Receipt processed. Merchant, date, totals, and currency have been saved.',
+        message: "We've saved the merchant, date, and total from your receipt.",
         receipt: data?.receipt
       };
     } catch (error) {
-      const details = error instanceof Error ? error.message : 'Unexpected OCR processing error.';
-      return { success: false, message: `Receipt uploaded, but OCR processing failed: ${details}` };
+      const details = error instanceof Error ? error.message : 'Something went wrong while reading the receipt.';
+      return { success: false, message: `Receipt uploaded, but we couldn't read the details automatically: ${details}` };
     }
   }
 
@@ -353,22 +356,13 @@ export class ReceiptService {
     }
 
     const rows = data as ReceiptHistoryItem[];
-    const withUrls = await Promise.all(
-      rows.map(async (item) => {
-        const { data: signedData } = await this.supabaseService.client.storage
-          .from(this.bucketName)
-          .createSignedUrl(item.image_url, 60 * 30);
-
-        return {
-          ...item,
-          total_amount: item.total_amount === null ? null : Number(item.total_amount),
-          signed_image_url: signedData?.signedUrl
-        };
-      })
-    );
-
-    const total = rows[0]?.total_count ?? 0;
-    return { items: withUrls, total };
+    return {
+      items: rows.map((item) => ({
+        ...item,
+        total_amount: item.total_amount === null ? null : Number(item.total_amount)
+      })),
+      total: rows[0]?.total_count ?? 0
+    };
   }
 
   async uploadReceipt(file: File, input?: ReceiptUploadInput): Promise<UploadResult> {
@@ -519,6 +513,7 @@ export class ReceiptService {
     const imagePaths = (rows ?? []).map((row) => row.image_url).filter(Boolean);
     if (imagePaths.length) {
       await this.supabaseService.client.storage.from(this.bucketName).remove(imagePaths);
+      imagePaths.forEach((path) => this.signedUrlCache.delete(path));
     }
 
     const { error: deleteError } = await this.supabaseService.client
@@ -534,6 +529,42 @@ export class ReceiptService {
       success: true,
       message: receiptIds.length === 1 ? 'Receipt deleted.' : `${receiptIds.length} receipts deleted.`
     };
+  }
+
+  /** Signs the receipt's storage path on demand - called only when the user opens it. */
+  async getReceiptImageLink(imagePath: string): Promise<string | undefined> {
+    const cached = this.signedUrlCache.get(imagePath);
+    const bufferMs = 60 * 1000;
+    if (cached && cached.expiresAt - bufferMs > Date.now()) {
+      return cached.url;
+    }
+
+    const pending = this.pendingSignRequests.get(imagePath);
+    if (pending) {
+      return pending;
+    }
+
+    const request = this.signReceiptImage(imagePath).finally(() => {
+      this.pendingSignRequests.delete(imagePath);
+    });
+    this.pendingSignRequests.set(imagePath, request);
+    return request;
+  }
+
+  private async signReceiptImage(imagePath: string): Promise<string | undefined> {
+    const { data } = await this.supabaseService.client.storage
+      .from(this.bucketName)
+      .createSignedUrl(imagePath, this.signedUrlExpirySeconds);
+
+    if (!data?.signedUrl) {
+      return undefined;
+    }
+
+    this.signedUrlCache.set(imagePath, {
+      url: data.signedUrl,
+      expiresAt: Date.now() + this.signedUrlExpirySeconds * 1000
+    });
+    return data.signedUrl;
   }
 
   private extractFileExtension(fileName: string): string {

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Home Finance separates browser and native-shell concerns from privileged data-processing work. Angular owns the user interface, Ionic provides mobile-oriented UI primitives, and Capacitor packages the same build for Android and iOS. Supabase owns authentication, Row Level Security (RLS), storage, PostgreSQL functions, and server-side Edge Functions.
+ExpenseIntel separates browser and native-shell concerns from privileged data-processing work. Angular owns the user interface, Ionic provides mobile-oriented UI primitives, and Capacitor packages the same build for Android and iOS. Supabase owns authentication, Row Level Security (RLS), storage, PostgreSQL functions, and server-side Edge Functions.
 
 ## Boundaries
 
@@ -26,11 +26,11 @@ Home Finance separates browser and native-shell concerns from privileged data-pr
 
 ### Native mobile delivery
 
-1. `npm run build` produces the Angular/Ionic web bundle in `dist/house-finance-assistance/browser`.
+1. `npm run build` produces the Angular/Ionic web bundle in `dist/expense-intel/browser`.
 2. `npm run android:sync` or `npm run ios:sync` copies that bundle into the corresponding Capacitor project.
 3. Android Studio or Xcode builds, signs, and runs the native shell.
 4. On native platforms, the receipt page calls Capacitor Camera and converts the returned image to a standard browser `File` before using the same Supabase upload service as the web app.
-5. Supabase email confirmation and recovery links use `homefinance://auth`; Capacitor forwards the link to the Angular auth route, where the client stores the returned session.
+5. Supabase email confirmation and recovery links use `expenseintel://auth`; Capacitor forwards the link to the Angular auth route, where the client stores the returned session.
 
 ### Analytics and assistant
 
@@ -44,7 +44,7 @@ Home Finance separates browser and native-shell concerns from privileged data-pr
 - RLS must be enabled for user-owned tables and policies must constrain rows to `auth.uid()`.
 - Receipt objects remain private. The app should use signed URLs only when a user needs access.
 - Browser code uses only the Supabase publishable key. `OPENAI_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` remain Edge Function secrets.
-- Capacitor projects contain no backend secrets. The native callback URL `homefinance://auth` must be listed in the Supabase Auth redirect allow-list alongside web callback URLs.
+- Capacitor projects contain no backend secrets. The native callback URL `expenseintel://auth` must be listed in the Supabase Auth redirect allow-list alongside web callback URLs.
 - Receipt data and assistant prompts are sensitive. Avoid logging document contents, tokens, or customer data in the client and Edge Functions.
 
 ## Testing Strategy
@@ -63,9 +63,9 @@ Run `npm run verify` before opening a pull request. It produces an optimized pro
 
 - Apply `supabase/migrations` to the target project.
 - Configure Supabase Auth redirect URLs for `<APP_URL>/auth`.
-- Configure the native callback redirect URL `homefinance://auth` for Android and iOS.
+- Configure the native callback redirect URL `expenseintel://auth` for Android and iOS.
 - Set client variables (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `APP_URL`) in the hosting environment.
 - Set Edge Function secrets separately, including `OPENAI_API_KEY`; never publish service credentials.
 - Deploy Edge Functions after their dependent migration is available.
-- Run `npm run verify` and confirm the production build output is `dist/house-finance-assistance/browser`.
+- Run `npm run verify` and confirm the production build output is `dist/expense-intel/browser`.
 - Run `npm run android:sync` or `npm run ios:sync` before opening the corresponding native project in Android Studio or Xcode.

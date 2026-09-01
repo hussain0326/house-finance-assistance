@@ -1,9 +1,9 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.homefinance.assistance',
-  appName: 'Home Finance',
-  webDir: 'dist/house-finance-assistance/browser'
+  appId: 'com.expenseintel.app',
+  appName: 'ExpenseIntel',
+  webDir: 'dist/expense-intel/browser'
 };
 
 export default config;

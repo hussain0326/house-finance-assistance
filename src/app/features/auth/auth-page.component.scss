@@ -1,5 +1,5 @@
 ion-content.auth-scroll {
-  --background: var(--color-surface-muted);
+  --background: var(--color-surface-alt);
 }
 
 .auth-bg {
@@ -7,7 +7,7 @@ ion-content.auth-scroll {
   min-height: 100vh;
   min-height: 100dvh;
   place-items: center;
-  padding: 24px;
+  padding: 32px 20px;
 }
 
 .auth-layout {
@@ -15,30 +15,66 @@ ion-content.auth-scroll {
   max-width: 30rem;
 }
 
+.auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.auth-brand-logo {
+  display: block;
+  width: 44px;
+  height: 44px;
+}
+
+.auth-brand-name {
+  color: var(--color-text);
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
 .auth-card {
   --background: var(--color-surface);
   margin: 0;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
 }
 
 .auth-header {
   padding: 28px 28px 12px;
+  align-items: center;
   flex-direction: column;
+  text-align: center;
+}
+
+.auth-title-icon {
+  display: inline-flex;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg-strong);
+  color: var(--color-primary-text);
+  font-size: 22px;
 }
 
 .auth-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   color: var(--color-text);
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 700;
 }
 
-.auth-title ion-icon {
+.auth-subtitle {
+  margin-top: 4px;
   color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.4;
 }
 
 .auth-content {
@@ -67,6 +103,8 @@ ion-content.auth-scroll {
 .auth-form ion-button {
   min-height: 46px;
   margin: 0;
+  text-transform: none;
+  font-weight: 600;
 }
 
 .auth-form .forgot-password-action {
@@ -90,12 +128,17 @@ ion-content.auth-scroll {
 .auth-actions ion-button {
   min-height: 36px;
   margin: 0;
+  text-transform: none;
 }
 
 @media (max-width: 639px) {
   .auth-bg {
     place-items: start center;
     padding: 16px;
+  }
+
+  .auth-brand {
+    margin-bottom: 16px;
   }
 
   .auth-header {

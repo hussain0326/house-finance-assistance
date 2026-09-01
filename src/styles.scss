@@ -70,6 +70,30 @@ ion-select[fill='solid'].ion-touched.ion-invalid.has-focus {
 	box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.15);
 }
 
+// Compact outline style with a floating label, used for filters and forms app-wide
+// (receipt history, analytics, settings, sign in/up) instead of the taller stacked-label solid fields.
+// Ionic hardcodes min-height: 56px on any floating/stacked label field (input.md.css /
+// select.md.css :host(.*-label-placement-floating)) regardless of --padding-*, so it must
+// be overridden directly here rather than through a custom property. Kept identical
+// between input/select so stacked mobile layouts don't show mismatched box heights.
+ion-input[fill='outline'],
+ion-select[fill='outline'] {
+	min-height: 2.5rem !important;
+	--border-radius: var(--radius-sm) !important;
+	--border-color: var(--color-neutral-400) !important;
+	--border-width: 1.5px !important;
+	--highlight-color-focused: var(--color-primary) !important;
+	--padding-top: 0.25rem !important;
+	--padding-bottom: 0.25rem !important;
+	--padding-start: 0.75rem !important;
+	--padding-end: 0.75rem !important;
+	font-size: 0.8125rem;
+}
+
+ion-select[fill='outline']::part(label) {
+	font-size: 0.75rem;
+}
+
 * {
 	box-sizing: border-box;
 }

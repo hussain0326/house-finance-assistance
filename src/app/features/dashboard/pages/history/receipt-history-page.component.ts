@@ -3,7 +3,7 @@ import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { IonButton, IonCard, IonCardContent, IonCheckbox, IonIcon, IonInput, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { closeOutline, createOutline, documentTextOutline, filterOutline, informationCircleOutline, openOutline, receiptOutline, refreshOutline, saveOutline, trashOutline } from 'ionicons/icons';
+import { alertCircleOutline, chevronBackOutline, chevronForwardOutline, closeOutline, createOutline, documentTextOutline, filterOutline, informationCircleOutline, openOutline, receiptOutline, refreshOutline, saveOutline, trashOutline } from 'ionicons/icons';
 import { ExpenseCategory, ExpenseCountry, ReceiptHistoryItem, ReceiptService } from '../../services/receipt.service';
 
 const MONTHS = [
@@ -63,7 +63,8 @@ export class ReceiptHistoryPageComponent {
   readonly editDate = signal('');
   readonly editCategoryId = signal<string | null>(null);
   readonly editCountryCode = signal<string | null>(null);
-  readonly failedPreviewIds = signal<Set<string>>(new Set());
+  readonly unavailableIds = signal<Set<string>>(new Set());
+  readonly openingIds = signal<Set<string>>(new Set());
 
   readonly selectedIds = signal<Set<string>>(new Set());
   readonly deleting = signal(false);
@@ -74,7 +75,7 @@ export class ReceiptHistoryPageComponent {
     private readonly formBuilder: FormBuilder,
     private readonly receiptService: ReceiptService
   ) {
-    addIcons({ closeOutline, createOutline, documentTextOutline, filterOutline, informationCircleOutline, openOutline, receiptOutline, refreshOutline, saveOutline, trashOutline });
+    addIcons({ alertCircleOutline, chevronBackOutline, chevronForwardOutline, closeOutline, createOutline, documentTextOutline, filterOutline, informationCircleOutline, openOutline, receiptOutline, refreshOutline, saveOutline, trashOutline });
     this.filterForm = this.formBuilder.group({
       search: [''],
       categoryId: [''],
@@ -107,6 +108,10 @@ export class ReceiptHistoryPageComponent {
     return (this.pageIndex() + 1) * this.pageSize() < this.total();
   }
 
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.total() / this.pageSize()));
+  }
+
   async changePage(direction: number): Promise<void> {
     const nextIndex = this.pageIndex() + direction;
     if (nextIndex < 0 || (direction > 0 && !this.hasNextPage)) {
@@ -134,14 +139,35 @@ export class ReceiptHistoryPageComponent {
     return item.image_url.toLowerCase().endsWith('.pdf');
   }
 
-  isImagePreviewUnavailable(item: ReceiptHistoryItem): boolean {
-    return !item.signed_image_url || this.failedPreviewIds().has(item.id);
+  isReceiptUnavailable(item: ReceiptHistoryItem): boolean {
+    return this.unavailableIds().has(item.id);
   }
 
-  markPreviewFailed(item: ReceiptHistoryItem): void {
-    const next = new Set(this.failedPreviewIds());
-    next.add(item.id);
-    this.failedPreviewIds.set(next);
+  isReceiptOpening(item: ReceiptHistoryItem): boolean {
+    return this.openingIds().has(item.id);
+  }
+
+  /** Signs and opens the receipt file only when the user asks to view it. */
+  async openReceipt(item: ReceiptHistoryItem): Promise<void> {
+    if (this.openingIds().has(item.id)) {
+      return;
+    }
+    this.openingIds.set(new Set(this.openingIds()).add(item.id));
+
+    try {
+      const url = await this.receiptService.getReceiptImageLink(item.image_url);
+      if (!url) {
+        const next = new Set(this.unavailableIds());
+        next.add(item.id);
+        this.unavailableIds.set(next);
+        return;
+      }
+      window.open(url, '_blank', 'noopener');
+    } finally {
+      const next = new Set(this.openingIds());
+      next.delete(item.id);
+      this.openingIds.set(next);
+    }
   }
 
   startEdit(item: ReceiptHistoryItem): void {
@@ -322,7 +348,7 @@ export class ReceiptHistoryPageComponent {
     this.loading.set(true);
     this.feedback.set('');
     this.selectedIds.set(new Set());
-    this.failedPreviewIds.set(new Set());
+    this.unavailableIds.set(new Set());
 
     const filters = this.filterForm.getRawValue();
     const { startDate, endDate } = this.resolveDateRange(filters.year, filters.month);

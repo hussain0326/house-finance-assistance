@@ -332,7 +332,7 @@ export class AuthService {
 
   private getAuthRedirectUrl(): string {
     if (Capacitor.isNativePlatform()) {
-      return 'homefinance://auth';
+      return 'expenseintel://auth';
     }
 
     const configuredAppUrl = (environment.appUrl ?? '').trim().replace(/\/$/, '');

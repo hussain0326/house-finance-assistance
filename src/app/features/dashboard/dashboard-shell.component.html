@@ -4,7 +4,7 @@
         <div class="brand-block">
           <div class="brand-mark"><img src="favicon.svg" alt="" /></div>
           <div>
-            <h1>Home Finance</h1>
+            <h1>ExpenseIntel</h1>
             <p>Personal Budget Assistance</p>
           </div>
         </div>
@@ -29,7 +29,7 @@
     <div class="brand-block">
       <div class="brand-mark"><img src="favicon.svg" alt="" /></div>
       <div>
-        <h1>Home Finance</h1>
+        <h1>ExpenseIntel</h1>
         <p>Personal Budget Assistance</p>
       </div>
     </div>
@@ -71,7 +71,7 @@
         </section>
       </main>
       <footer class="app-footer" aria-label="Application footer">
-        <span class="footer-copy">© {{ currentYear }} Home Finance Assistance</span>
+        <span class="footer-copy">© {{ currentYear }} ExpenseIntel</span>
       </footer>
     </ion-content>
 
@@ -79,7 +79,7 @@
       @for (item of mobileNavItems; track item.route) {
         <ion-tab-button [routerLink]="item.route" routerLinkActive="active-mobile" [routerLinkActiveOptions]="{ exact: true }" [tab]="item.route">
           <ion-icon [name]="item.icon" aria-hidden="true"></ion-icon>
-          <ion-label>{{ item.label }}</ion-label>
+          <ion-label>{{ item.mobileLabel }}</ion-label>
         </ion-tab-button>
       }
     </ion-tab-bar>

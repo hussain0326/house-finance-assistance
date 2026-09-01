@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist/house-finance-assistance/browser",
+  "outputDirectory": "dist/expense-intel/browser",
   "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }

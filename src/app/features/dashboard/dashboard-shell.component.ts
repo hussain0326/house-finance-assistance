@@ -32,6 +32,7 @@ import { AuthService } from '../../core/auth/auth.service';
 
 type NavItem = {
   readonly label: string;
+  readonly mobileLabel: string;
   readonly route: string;
   readonly icon: string;
 };
@@ -65,12 +66,12 @@ export class DashboardShellComponent {
   private readonly router = inject(Router);
 
   readonly navItems: NavItem[] = [
-    { label: 'Dashboard', route: '/app/dashboard', icon: 'home-outline' },
-    { label: 'Receipt', route: '/app/receipt', icon: 'receipt-outline' },
-    { label: 'Receipt History', route: '/app/history', icon: 'time-outline' },
-    { label: 'Analytics', route: '/app/analytics', icon: 'analytics-outline' },
-    { label: 'AI Assistant', route: '/app/assistant', icon: 'sparkles-outline' },
-    { label: 'Settings', route: '/app/settings', icon: 'settings-outline' }
+    { label: 'Dashboard', mobileLabel: 'Dashboard', route: '/app/dashboard', icon: 'home-outline' },
+    { label: 'Receipt', mobileLabel: 'Receipt', route: '/app/receipt', icon: 'receipt-outline' },
+    { label: 'Receipt History', mobileLabel: 'History', route: '/app/history', icon: 'time-outline' },
+    { label: 'Analytics', mobileLabel: 'Analytics', route: '/app/analytics', icon: 'analytics-outline' },
+    { label: 'AI Assistant', mobileLabel: 'Assistant', route: '/app/assistant', icon: 'sparkles-outline' },
+    { label: 'Settings', mobileLabel: 'Settings', route: '/app/settings', icon: 'settings-outline' }
   ];
   readonly mobileNavItems = this.navItems.filter((item) => item.route !== '/app/settings');
 
@@ -100,7 +101,7 @@ export class DashboardShellComponent {
       case '/app/settings':
         return 'Account Settings';
       default:
-        return 'Home Finance Console';
+        return 'ExpenseIntel Console';
     }
   });
 

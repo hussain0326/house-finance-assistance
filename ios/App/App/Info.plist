@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Home Finance</string>
+        <string>ExpenseIntel</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -29,7 +29,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>homefinance</string>
+				<string>expenseintel</string>
 			</array>
 		</dict>
 	</array>
@@ -78,6 +78,6 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Home Finance uses the camera to capture photos of your receipts for expense tracking.</string>
+	<string>ExpenseIntel uses the camera to capture photos of your receipts for expense tracking.</string>
 </dict>
 </plist>

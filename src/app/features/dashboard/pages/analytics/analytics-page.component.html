@@ -65,30 +65,30 @@
     </div>
 
     <form class="analytics-filter-form" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
-      <ion-input label="Merchant" labelPlacement="stacked" fill="solid" formControlName="merchant" placeholder="Aldi, H&M..."></ion-input>
+      <ion-input label="Merchant" labelPlacement="floating" fill="outline" formControlName="merchant" placeholder="Aldi, H&M..."></ion-input>
 
-      <ion-select label="Category" labelPlacement="stacked" fill="solid" formControlName="categoryId">
+      <ion-select label="Category" labelPlacement="floating" fill="outline" interface="popover" formControlName="categoryId">
           <ion-select-option value="">All categories</ion-select-option>
           @for (category of categories(); track category.id) {
             <ion-select-option [value]="category.id">{{ category.name }}</ion-select-option>
           }
       </ion-select>
 
-      <ion-select label="Country" labelPlacement="stacked" fill="solid" formControlName="countryCode">
+      <ion-select label="Country" labelPlacement="floating" fill="outline" interface="popover" formControlName="countryCode">
           <ion-select-option value="">All countries</ion-select-option>
           @for (country of countries(); track country.code) {
             <ion-select-option [value]="country.code">{{ country.name }}</ion-select-option>
           }
       </ion-select>
 
-      <ion-select label="Year" labelPlacement="stacked" fill="solid" formControlName="year">
+      <ion-select label="Year" labelPlacement="floating" fill="outline" interface="popover" formControlName="year">
           <ion-select-option value="">All years</ion-select-option>
           @for (year of years; track year) {
             <ion-select-option [value]="year">{{ year }}</ion-select-option>
           }
       </ion-select>
 
-      <ion-select label="Month" labelPlacement="stacked" fill="solid" formControlName="month">
+      <ion-select label="Month" labelPlacement="floating" fill="outline" interface="popover" formControlName="month">
           <ion-select-option value="">All months</ion-select-option>
           @for (month of months; track month.value) {
             <ion-select-option [value]="month.value">{{ month.label }}</ion-select-option>

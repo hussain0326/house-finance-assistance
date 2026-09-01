@@ -7,13 +7,12 @@
     <div>
       <h2 class="m-0 text-xl font-semibold">Upload Receipt</h2>
       <p class="mt-1 text-slate-600">
-        Supported files: JPG, JPEG, PNG, PDF. Uploaded files are stored in private Supabase storage
-        and linked to the receipts table. OCR extracts the merchant, date, totals, currency, and line items for review.
+        Snap a photo or upload a file, and we'll automatically pull out the merchant, date, and total for you.
       </p>
     </div>
   </div>
 
-  <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+  <div class="mt-4 dropzone" (click)="fileInput.click()">
     <input #fileInput type="file" accept=".jpg,.jpeg,.png,.pdf" class="hidden" (change)="onFileSelected($event)" aria-label="Select receipt file" />
     <input
       #cameraInput
@@ -25,34 +24,49 @@
       aria-label="Scan receipt with camera"
     />
 
-    <ion-button fill="outline" type="button" (click)="fileInput.click()">
-      <ion-icon slot="start" name="document-attach-outline"></ion-icon>
-      Choose Receipt File
-    </ion-button>
+    <div class="dropzone-icon">
+      <ion-icon name="cloud-upload-outline" aria-hidden="true"></ion-icon>
+    </div>
+    <p class="dropzone-title">Choose a receipt to upload</p>
+    <p class="dropzone-hint">JPG, JPEG, PNG, or PDF</p>
 
-    <ion-button fill="outline" type="button" (click)="scanWithCamera()">
-      <ion-icon slot="start" name="camera-outline"></ion-icon>
-      Scan with Camera
-    </ion-button>
+    <div class="dropzone-actions" (click)="$event.stopPropagation()">
+      <ion-button fill="outline" size="small" type="button" (click)="fileInput.click()">
+        <ion-icon slot="start" name="document-attach-outline"></ion-icon>
+        Choose File
+      </ion-button>
 
-    <p class="text-sm text-slate-600" *ngIf="selectedFile(); else noFile">{{ selectedFile()!.name }}</p>
-    <ng-template #noFile>
-      <p class="text-sm text-slate-500">No file selected</p>
-    </ng-template>
-
-    <ion-button
-      color="primary"
-      type="button"
-      [disabled]="isUploading() || !selectedFile()"
-      (click)="uploadSelected()"
-    >
-        <ion-spinner *ngIf="isUploading()" name="crescent"></ion-spinner>
-        @if (!isUploading()) {
-          <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
-        }
-        Upload Receipt
-    </ion-button>
+      <ion-button fill="outline" size="small" type="button" (click)="scanWithCamera()">
+        <ion-icon slot="start" name="camera-outline"></ion-icon>
+        Scan with Camera
+      </ion-button>
+    </div>
   </div>
+
+  @if (selectedFile()) {
+    <div class="file-chip mt-3">
+      <ion-icon name="document-attach-outline" aria-hidden="true"></ion-icon>
+      <span class="file-chip-name">{{ selectedFile()!.name }}</span>
+      <button type="button" class="file-chip-remove" (click)="clearSelectedFile()" aria-label="Remove selected file">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+  }
+
+  <ion-button
+    class="mt-3 upload-btn"
+    expand="block"
+    color="primary"
+    type="button"
+    [disabled]="isUploading() || !selectedFile()"
+    (click)="uploadSelected()"
+  >
+      <ion-spinner *ngIf="isUploading()" name="crescent"></ion-spinner>
+      @if (!isUploading()) {
+        <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+      }
+      Upload Receipt
+  </ion-button>
 
   @if (uploadMessage()) {
     <div
@@ -63,13 +77,13 @@
       [class.text-red-700]="!uploadSuccess()"
       aria-live="polite"
     >
-      <span>{{ uploadSuccess() ? '✓' : '!' }}</span>
+      <ion-icon [name]="uploadSuccess() ? 'checkmark-circle-outline' : 'warning-outline'" aria-hidden="true"></ion-icon>
       <span>{{ uploadMessage() }}</span>
     </div>
   }
 
   @if (ocrStatus() === 'processing') {
-    <p class="mt-2 text-sm text-slate-600" aria-live="polite">OCR status: processing</p>
+    <p class="mt-2 text-sm text-slate-600" aria-live="polite">Reading your receipt details...</p>
   }
 
   @if (ocrStatus() === 'complete') {

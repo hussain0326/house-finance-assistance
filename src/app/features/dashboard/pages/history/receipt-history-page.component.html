@@ -9,43 +9,43 @@
     </div>
   </div>
 
-  <form class="mt-4 grid gap-3 md:grid-cols-3 lg:grid-cols-5" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
-    <ion-input label="Merchant Name" labelPlacement="stacked" fill="solid" formControlName="search" placeholder="Aldi, utility, transport..."></ion-input>
+  <form class="filter-form mt-4 grid gap-2 md:grid-cols-3 lg:grid-cols-5" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+    <ion-input class="filter-field" label="Merchant Name" labelPlacement="floating" fill="outline" formControlName="search" placeholder="Aldi, utility, transport..."></ion-input>
 
-    <ion-select label="Category" labelPlacement="stacked" fill="solid" formControlName="categoryId">
+    <ion-select class="filter-field" label="Category" labelPlacement="floating" fill="outline" interface="popover" formControlName="categoryId">
         <ion-select-option value="">All categories</ion-select-option>
         @for (category of categories(); track category.id) {
           <ion-select-option [value]="category.id">{{ category.name }}</ion-select-option>
         }
     </ion-select>
 
-    <ion-select label="Country" labelPlacement="stacked" fill="solid" formControlName="countryCode">
+    <ion-select class="filter-field" label="Country" labelPlacement="floating" fill="outline" interface="popover" formControlName="countryCode">
         <ion-select-option value="">All countries</ion-select-option>
         @for (country of countries(); track country.code) {
           <ion-select-option [value]="country.code">{{ country.name }}</ion-select-option>
         }
     </ion-select>
 
-    <ion-select label="Year" labelPlacement="stacked" fill="solid" formControlName="year">
+    <ion-select class="filter-field" label="Year" labelPlacement="floating" fill="outline" interface="popover" formControlName="year">
         <ion-select-option value="">All years</ion-select-option>
         @for (year of years; track year) {
           <ion-select-option [value]="year">{{ year }}</ion-select-option>
         }
     </ion-select>
 
-    <ion-select label="Month" labelPlacement="stacked" fill="solid" formControlName="month">
+    <ion-select class="filter-field" label="Month" labelPlacement="floating" fill="outline" interface="popover" formControlName="month">
         <ion-select-option value="">All months</ion-select-option>
         @for (month of months; track month.value) {
           <ion-select-option [value]="month.value">{{ month.label }}</ion-select-option>
         }
     </ion-select>
 
-    <div class="md:col-span-3 lg:col-span-5 flex flex-wrap gap-2">
-      <ion-button type="submit" [disabled]="loading()">
+    <div class="filter-actions md:col-span-3 lg:col-span-5 flex flex-wrap gap-2">
+      <ion-button class="filter-apply-btn" size="small" type="submit" [disabled]="loading()">
         <ion-icon slot="start" name="filter-outline"></ion-icon>
         Apply Filters
       </ion-button>
-      <ion-button fill="clear" type="button" (click)="resetFilters()" [disabled]="loading()">
+      <ion-button class="filter-reset-btn" size="small" fill="clear" type="button" (click)="resetFilters()" [disabled]="loading()">
         <ion-icon slot="start" name="refresh-outline"></ion-icon>
         Reset
       </ion-button>
@@ -79,40 +79,33 @@
   <div class="mt-4 grid gap-3">
     @for (item of items(); track trackById($index, item)) {
       <article class="history-row p-3">
-        <div class="grid gap-3 md:grid-cols-[auto_96px_1fr_auto] md:items-center">
+        <div class="grid gap-3 md:grid-cols-[auto_64px_1fr_auto] md:items-center">
           <ion-checkbox
             [checked]="isSelected(item)"
             (ionChange)="toggleSelection(item, $event.detail.checked)"
             [attr.aria-label]="'Select receipt from ' + (item.merchant_name || 'unknown merchant')"
           ></ion-checkbox>
 
-          <a
-            [href]="item.signed_image_url"
-            target="_blank"
-            rel="noopener"
+          <button
+            type="button"
             class="receipt-preview"
             [class.receipt-preview--pdf]="isPdfReceipt(item)"
-            [class.receipt-preview--image-missing]="!isPdfReceipt(item) && isImagePreviewUnavailable(item)"
+            [class.receipt-preview--image-missing]="isReceiptUnavailable(item)"
+            [disabled]="isReceiptUnavailable(item) || isReceiptOpening(item)"
+            (click)="openReceipt(item)"
             [attr.aria-label]="isPdfReceipt(item) ? 'Open PDF receipt' : 'Open receipt image'"
           >
-            @if (isPdfReceipt(item)) {
+            @if (isReceiptUnavailable(item)) {
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              <span>N/A</span>
+            } @else if (isPdfReceipt(item)) {
               <ion-icon name="document-text-outline"></ion-icon>
               <span>PDF</span>
-            } @else if (isImagePreviewUnavailable(item)) {
-              <ion-icon name="receipt-outline"></ion-icon>
-              <span>IMAGE</span>
             } @else {
-              <img
-                class="receipt-preview__image"
-                [src]="item.signed_image_url"
-                alt="Receipt preview"
-                (error)="markPreviewFailed(item)"
-              />
-              <span class="receipt-preview__open">
-                <ion-icon name="open-outline"></ion-icon>
-              </span>
+              <ion-icon name="receipt-outline"></ion-icon>
+              <span>View</span>
             }
-          </a>
+          </button>
 
           <div>
             @if (editingId() === item.id) {
@@ -206,29 +199,22 @@
                 • {{ item.country_name }}
               }
             </p>
-            @if (item.merchant_address || item.merchant_city || item.merchant_postal_code) {
-              <p class="m-0 text-xs text-slate-500">
-                {{ item.merchant_address }}
-                @if (item.merchant_postal_code || item.merchant_city) {
-                  • {{ item.merchant_postal_code }} {{ item.merchant_city }}
-                }
-              </p>
-            }
-            <p class="m-0 text-xs text-slate-500">Receipt ID: {{ item.id }}</p>
             @if (editingId() !== item.id) {
-              <ion-button class="mt-2" fill="clear" type="button" (click)="startEdit(item)">
+              <ion-button class="edit-details-btn" size="small" fill="clear" type="button" (click)="startEdit(item)">
                 <ion-icon slot="start" name="create-outline"></ion-icon>
                 Edit details
               </ion-button>
             }
           </div>
 
-          <div class="text-right">
+          <div class="receipt-amount">
             <p class="m-0 text-lg font-semibold">
               {{ (item.total_amount ?? 0) | currency: item.currency || 'EUR' }}
+              <span class="text-xs font-normal text-slate-500">{{ item.currency }}</span>
             </p>
-            <p class="m-0 text-xs text-slate-500">{{ item.currency }}</p>
             <ion-button
+              class="delete-btn"
+              size="small"
               fill="clear"
               color="danger"
               type="button"
@@ -245,11 +231,31 @@
   </div>
 
   <div class="history-pagination" aria-label="Receipt pagination">
-    <ion-select label="Rows" labelPlacement="stacked" fill="solid" [value]="pageSize()" (ionChange)="changePageSize($event.detail.value)">
-      <ion-select-option [value]="5">5</ion-select-option><ion-select-option [value]="10">10</ion-select-option><ion-select-option [value]="20">20</ion-select-option><ion-select-option [value]="50">50</ion-select-option>
+    <ion-select class="rows-select" aria-label="Rows per page" interface="popover" fill="solid" [value]="pageSize()" (ionChange)="changePageSize($event.detail.value)">
+      <ion-select-option [value]="5">5 rows</ion-select-option><ion-select-option [value]="10">10 rows</ion-select-option><ion-select-option [value]="20">20 rows</ion-select-option><ion-select-option [value]="50">50 rows</ion-select-option>
     </ion-select>
-    <span>Page {{ pageIndex() + 1 }}</span>
-    <ion-button fill="outline" [disabled]="loading() || !hasPreviousPage" (click)="changePage(-1)">Previous</ion-button>
-    <ion-button fill="outline" [disabled]="loading() || !hasNextPage" (click)="changePage(1)">Next</ion-button>
+    <span class="pagination-status">Page {{ pageIndex() + 1 }} of {{ totalPages }}</span>
+    <div class="pagination-nav">
+      <ion-button
+        class="pagination-nav-btn"
+        size="small"
+        fill="outline"
+        [disabled]="loading() || !hasPreviousPage"
+        aria-label="Previous page"
+        (click)="changePage(-1)"
+      >
+        <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+      <ion-button
+        class="pagination-nav-btn"
+        size="small"
+        fill="outline"
+        [disabled]="loading() || !hasNextPage"
+        aria-label="Next page"
+        (click)="changePage(1)"
+      >
+        <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
+      </ion-button>
+    </div>
   </div>
 </ion-card-content></ion-card>

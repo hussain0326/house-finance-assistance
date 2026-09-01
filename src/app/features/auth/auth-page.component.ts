@@ -74,7 +74,7 @@ export class AuthPageComponent {
         ? 'Reset Your Password'
       : this.isSignInModeSignal()
         ? 'Welcome Back'
-        : 'Create Your Finance Account'
+        : 'Create Your ExpenseIntel Account'
   );
   readonly authIcon = computed(() =>
     this.isPasswordRecovery() || this.isForgotPasswordSignal()

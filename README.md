@@ -1,6 +1,6 @@
-# Home Finance
+# ExpenseIntel
 
-Home Finance is a full-stack personal-finance progressive web app. It helps people turn receipts into reviewable expense records, understand household spending, and ask data-grounded questions about their finances.
+ExpenseIntel is a full-stack personal-finance progressive web app. It helps people turn receipts into reviewable expense records, understand household spending, and ask data-grounded questions about their finances.
 
 Built as a portfolio project, it demonstrates product-focused frontend development, serverless backend integration, AI-assisted workflows, secure data handling, and automated quality checks.
 
@@ -10,7 +10,7 @@ Receipt-based expense tracking is tedious: data must be captured, categorised, c
 
 ### The solution
 
-Home Finance provides one connected workflow:
+ExpenseIntel provides one connected workflow:
 
 1. A signed-in user uploads a JPG, PNG, or PDF receipt to private storage.
 2. A server-side function extracts the receipt data using AI and deterministic category and country rules.
@@ -143,7 +143,7 @@ Sign in instantly without creating an account: open the app and select **Try the
 
 ### Native mobile builds
 
-The app remains a web PWA and can also be packaged with Capacitor. Both native projects consume the same `dist/house-finance-assistance/browser` build as Vercel.
+The app remains a web PWA and can also be packaged with Capacitor. Both native projects consume the same `dist/expense-intel/browser` build as Vercel.
 
 | Command | Purpose |
 | --- | --- |
@@ -186,14 +186,14 @@ ios/                     Capacitor iOS application project
 
 ## Deployment
 
-Vercel is configured to build with `npm run build` and serve `dist/house-finance-assistance/browser`, including an SPA rewrite. Its Git integration creates a production deployment when changes are pushed to the configured production branch and preview deployments for pull requests.
+Vercel is configured to build with `npm run build` and serve `dist/expense-intel/browser`, including an SPA rewrite. Its Git integration creates a production deployment when changes are pushed to the configured production branch and preview deployments for pull requests.
 
 ### One-time Vercel setup
 
 1. Connect the GitHub repository to the Vercel project and set `main` as the production branch.
 2. In Vercel project settings, add the production `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `APP_URL` environment variables.
 3. Set Supabase Auth Site URL to `<APP_URL>` and add `<APP_URL>/auth` to allowed redirect URLs.
-4. Add `homefinance://auth` to Supabase Auth redirect URLs for Android and iOS confirmation and recovery callbacks.
+4. Add `expenseintel://auth` to Supabase Auth redirect URLs for Android and iOS confirmation and recovery callbacks.
 5. Push to `main` to trigger a Vercel production deployment.
 
 GitHub Actions independently runs `npm run verify` for pull requests and pushes to `main`. It reports build and test health, while Vercel remains responsible for deployment.

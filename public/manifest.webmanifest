@@ -1,6 +1,6 @@
 {
-  "name": "AI Household Finance",
-  "short_name": "HomeFinance",
+  "name": "ExpenseIntel",
+  "short_name": "ExpenseIntel",
   "description": "Scan receipts, track expenses, and get AI-powered spending insights.",
   "display": "standalone",
   "scope": "./",

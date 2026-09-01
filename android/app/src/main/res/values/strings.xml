@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Home Finance</string>
-    <string name="title_activity_main">Home Finance</string>
-    <string name="package_name">com.homefinance.assistance</string>
-    <string name="custom_url_scheme">com.homefinance.assistance</string>
+    <string name="app_name">ExpenseIntel</string>
+    <string name="title_activity_main">ExpenseIntel</string>
+    <string name="package_name">com.expenseintel.app</string>
+    <string name="custom_url_scheme">com.expenseintel.app</string>
 </resources>

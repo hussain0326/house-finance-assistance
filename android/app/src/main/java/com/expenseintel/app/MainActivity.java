@@ -1,4 +1,4 @@
-package com.homefinance.assistance;
+package com.expenseintel.app;
 
 import com.getcapacitor.BridgeActivity;
 

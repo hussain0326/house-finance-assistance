@@ -153,6 +153,7 @@ ion-menu {
 
 .main-content {
   flex: 1;
+  min-height: 0;
 }
 
 .content-wrapper {
@@ -187,7 +188,20 @@ ion-menu {
 }
 
 .bottom-nav ion-tab-button {
+  min-width: 0;
   transition: color var(--transition-base), background-color var(--transition-base);
+}
+
+.bottom-nav ion-tab-button ion-icon {
+  font-size: 1.25rem;
+}
+
+.bottom-nav ion-tab-button ion-label {
+  overflow: hidden;
+  max-width: 100%;
+  margin-top: 2px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bottom-nav ion-tab-button.active-mobile {

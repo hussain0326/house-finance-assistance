@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonButton, IonCard, IonCardContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { cameraOutline, checkmarkCircleOutline, cloudUploadOutline, documentAttachOutline, receiptOutline, timeOutline } from 'ionicons/icons';
+import { cameraOutline, checkmarkCircleOutline, closeOutline, cloudUploadOutline, documentAttachOutline, receiptOutline, timeOutline, warningOutline } from 'ionicons/icons';
 import { MediaService } from '../../../../core/media/media.service';
 import { ReceiptService } from '../../services/receipt.service';
 
@@ -39,10 +39,12 @@ export class ReceiptPageComponent {
     addIcons({
       cameraOutline,
       checkmarkCircleOutline,
+      closeOutline,
       cloudUploadOutline,
       documentAttachOutline,
       receiptOutline,
-      timeOutline
+      timeOutline,
+      warningOutline
     });
   }
 
@@ -54,6 +56,13 @@ export class ReceiptPageComponent {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
     this.selectedFile.set(file);
+    this.uploadMessage.set('');
+    this.reviewMessage.set('');
+    this.ocrStatus.set('idle');
+  }
+
+  clearSelectedFile(): void {
+    this.selectedFile.set(null);
     this.uploadMessage.set('');
     this.reviewMessage.set('');
     this.ocrStatus.set('idle');
@@ -82,7 +91,8 @@ export class ReceiptPageComponent {
     this.reviewMessage.set('');
     this.ocrStatus.set('processing');
 
-    const result = await this.receiptService.uploadReceipt(file);
+    const uploadFile = await this.mediaService.compressImage(file);
+    const result = await this.receiptService.uploadReceipt(uploadFile);
 
     this.isUploading.set(false);
     this.uploadSuccess.set(result.success);
@@ -92,7 +102,7 @@ export class ReceiptPageComponent {
       this.selectedFile.set(null);
       const processingResult = result.receiptId
         ? await this.receiptService.processReceipt(result.receiptId)
-        : { success: false, message: 'OCR processing could not be started.' };
+        : { success: false, message: "We couldn't start reading the receipt details." };
       this.ocrStatus.set(processingResult.success ? 'complete' : 'failed');
       this.uploadMessage.set(
         processingResult.success ? processingResult.message : `${result.message} ${processingResult.message}`
@@ -100,7 +110,7 @@ export class ReceiptPageComponent {
       this.uploadSuccess.set(processingResult.success);
       if (processingResult.success) {
         this.reviewMessage.set(
-          'Review the extracted date, country, category, and amount in Receipt History. You can edit the receipt details there.'
+          'Double-check the date, country, category, and amount in Receipt History - you can edit anything there.'
         );
       }
     }

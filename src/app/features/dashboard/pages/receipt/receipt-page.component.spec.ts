@@ -22,7 +22,8 @@ describe('ReceiptPageComponent', () => {
     };
     mediaService = {
       isNativePlatform: false,
-      captureReceipt: jasmine.createSpy('captureReceipt').and.resolveTo(null)
+      captureReceipt: jasmine.createSpy('captureReceipt').and.resolveTo(null),
+      compressImage: jasmine.createSpy('compressImage').and.callFake((file: File) => Promise.resolve(file))
     };
 
     await TestBed.configureTestingModule({
